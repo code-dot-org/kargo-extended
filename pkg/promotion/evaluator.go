@@ -318,6 +318,7 @@ func (p *StepEvaluator) BuildStepContext(
 		Project:          promoCtx.Project,
 		Stage:            promoCtx.Stage,
 		Promotion:        promoCtx.Promotion,
+		PromotionUID:     promoCtx.PromotionUID,
 		PromotionActor:   promoCtx.Actor,
 		FreightRequests:  freightRequests,
 		Freight:          *promoCtx.Freight.DeepCopy(),

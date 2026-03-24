@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"k8s.io/cli-runtime/pkg/genericiooptions"
 
+	stepplugincli "github.com/akuity/kargo/extended/pkg/stepplugin/cli"
 	"github.com/akuity/kargo/pkg/cli/cmd/apply"
 	"github.com/akuity/kargo/pkg/cli/cmd/approve"
 	cliconfigcmd "github.com/akuity/kargo/pkg/cli/cmd/config"
@@ -61,6 +62,7 @@ func NewRootCommand(cfg clicfg.CLIConfig) *cobra.Command {
 	cmd.AddCommand(verify.NewCommand(cfg))
 	cmd.AddCommand(version.NewCommand(cfg, streams))
 	cmd.AddCommand(server.NewCommand())
+	cmd.AddCommand(stepplugincli.NewRootCommand())
 
 	return cmd
 }

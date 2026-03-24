@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/spf13/cobra"
+
+	steppluginagent "github.com/akuity/kargo/extended/pkg/stepplugin/agent"
 )
 
 var (
@@ -25,6 +27,7 @@ func Execute(ctx context.Context) error {
 	rootCmd.AddCommand(newGarbageCollectorCommand())
 	rootCmd.AddCommand(newKubernetesWebhooksServerCommand())
 	rootCmd.AddCommand(newManagementControllerCommand())
+	rootCmd.AddCommand(steppluginagent.NewCommand())
 	rootCmd.AddCommand(newVersionCommand())
 	return rootCmd.ExecuteContext(ctx)
 }

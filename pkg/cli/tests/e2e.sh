@@ -222,6 +222,20 @@ kubectl_assert_not_exists() {
     fi
 }
 
+wait_for_project_deletion() {
+    local project="$1"
+
+    for _ in $(seq 1 60); do
+        if ! kubectl get namespace "$project" >/dev/null 2>&1 &&
+            ! "$KARGO_BIN" get projects "$project" $KARGO_FLAGS >/dev/null 2>&1; then
+            return 0
+        fi
+        sleep 2
+    done
+
+    return 1
+}
+
 # Use kubectl to verify a field value in a Kubernetes resource
 kubectl_assert_field() {
     local description="$1"
@@ -341,6 +355,9 @@ run_test_capture() {
     fi
 }
 
+# Load fork-owned smoke tests.
+. "$REPO_ROOT/extended/tests/e2e_stepplugins.sh"
+
 # Cleanup function
 cleanup() {
     log_section "CLEANUP"
@@ -370,6 +387,8 @@ cleanup() {
 
     # Delete shared repo credentials if created
     $KARGO_BIN delete repo-credentials --shared "test-shared-repo-creds" $KARGO_FLAGS 2>/dev/null || true
+
+    cleanup_stepplugin_e2e
 
     log_info "Cleanup complete"
 }
@@ -575,6 +594,11 @@ fi
 log_info "Waiting for warehouse to produce freight..."
 sleep 5
 
+if [[ -n "${STEPPLUGINS_ONLY:-}" ]]; then
+    run_stepplugin_e2e_tests
+    exit 0
+fi
+
 # =============================================================================
 # 5. FREIGHT TESTS
 # =============================================================================
@@ -778,6 +802,10 @@ if [[ -n "$FREIGHT_NAME" ]]; then
     fi
 else
     log_info "No freight available - skipping promotion tests"
+fi
+
+if [[ -z "${STEPPLUGINS_SKIP:-}" ]]; then
+    run_stepplugin_e2e_tests
 fi
 
 # =============================================================================
@@ -1394,8 +1422,7 @@ kubectl_assert_not_exists "Shared repo credentials deleted" "secret" "$TEST_SHAR
 # Delete test project after ConfigMap and Credentials tests
 $KARGO_BIN delete project $TEST_PROJECT $KARGO_FLAGS 2>/dev/null || true
 
-# Wait for project deletion to complete (namespace finalizers take time)
-sleep 15
+run_test "Wait for project deletion to complete" "wait_for_project_deletion $TEST_PROJECT"
 
 # =============================================================================
 # 17. PROJECT CONFIG TESTS

@@ -5,7 +5,7 @@ specs, plans and other md files like: linux kernel mailing list posts, or
 OpenBSD man pages, or Plan 9 / Bell Labs papers and docs with SQLite exactness.
 
 Directions inside the main `<kargo-extended></kargo-extended>` block (which we
-are in now) should supersede those in the rest of this file, as these are
+are in now) should supersede those in the rest of this file, as these are 
 fork-specific overrides. The rest of the file is from upstream kargo, and is
 very useful to follow, but kargo-extended fork directions have primacy if/when
 there's any konflict.
@@ -72,6 +72,34 @@ to be added to Kargo.
 - If an approach needs broad edits to a file outside `extended/`, stop and ask
   whether more of that logic can move under `extended/` first.
 
+## Running E2E Tests
+
+- If asked to run `pkg/cli/tests/e2e.sh`, first follow
+  `docs/docs/60-contributor-guide/10-hacking-on-kargo.md` for local cluster
+  and Tilt setup.
+- Prefer a temporary `KUBECONFIG` in your shell if you need to use kind for
+  e2e work and do not want to mutate the user's global kube context.
+- On a fresh kind/Tilt cluster, `pkg/cli/tests/e2e.sh` currently assumes the
+  singleton `ClusterConfig/cluster` already exists. If `kargo get
+  clusterconfig` returns `404`, seed it before running e2e:
+
+  ```bash
+  kubectl get clusterconfig.kargo.akuity.io cluster >/dev/null 2>&1 || cat <<'EOF' | kubectl apply -f -
+  apiVersion: kargo.akuity.io/v1alpha1
+  kind: ClusterConfig
+  metadata:
+    name: cluster
+  spec: {}
+  EOF
+  ```
+
+- For our kargo-extended e2e tests only, use:
+  `STEPPLUGINS_ONLY=true ./pkg/cli/tests/e2e.sh`
+- To run their upstream kargo suite without our tests, use:
+  `STEPPLUGINS_SKIP=true ./pkg/cli/tests/e2e.sh`
+- To run both e2e suites (usually do this), run:
+  `./pkg/cli/tests/e2e.sh`
+
 ## Technical Proposals
 
 - Technical proposals live in `extended/docs/proposals/`.
@@ -114,7 +142,9 @@ to be added to Kargo.
    in phases with checkable items.
 5. When implementing a proposal, it is encouraged to use a branch named like
    `proposal/NNNN-proposal-dir-name`.
-6. The PR title should match the current title in `proposal.md`.
+6. The PR title should match the current title in `proposal.md`, but with a
+   valid Conventional Commits prefix. For new proposal implementation work,
+   prefer `feat:`.
 7. When implementation starts, update the PR description to include:
    - a GitHub link to the proposal directory on the implementation branch
    - a direct GitHub link to `proposal.md` on the implementation branch
@@ -200,17 +230,6 @@ context), RE-READ the proposal and all its docs.
 @CODEX: if you are working on writing or editing or refining a proposal,
 periodically re-read extended/docs/AGENTS.md to re-emphasize the writing
 style we expect, and keep it near the top of your mind/context.
-
-- If you are trying to run e2e tests in this repo, see
-  `docs/docs/60-contributor-guide/10-hacking-on-kargo.md` first for local
-  cluster and Tilt setup.
-- If you only need the fork StepPlugin smoke path, run
-  `STEPPLUGINS_ONLY=true ./pkg/cli/tests/e2e.sh` after that setup.
-- `README.md` at the repo root is intentionally a symlink to
-  `extended/README.md`.
-- Upstream `README.md` changes will likely conflict on rebases or merges.
-- In this fork, keep `README.md` as that symlink and ignore upstream content
-  churn there unless the user explicitly asks otherwise.
 
 DO NOT EDIT BELOW THIS LINE OR WE WILL HAVE MERGE CONFLICTS WITH UPSTREAM KARGO
 

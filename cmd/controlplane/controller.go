@@ -19,6 +19,7 @@ import (
 
 	rollouts "github.com/akuity/kargo/api/stubs/rollouts/v1alpha1"
 	kargoapi "github.com/akuity/kargo/api/v1alpha1"
+	stepplugincontroller "github.com/akuity/kargo/extended/pkg/stepplugin/controller"
 	libargocd "github.com/akuity/kargo/pkg/argocd"
 	"github.com/akuity/kargo/pkg/controller"
 	argocd "github.com/akuity/kargo/pkg/controller/argocd/api/v1alpha1"
@@ -424,16 +425,20 @@ func (o *controllerOptions) setupReconcilers(
 	sharedIndexer := indexer.NewSharedFieldIndexer(kargoMgr.GetFieldIndexer())
 
 	if promotionsReconcilerCfg := promotions.ReconcilerConfigFromEnv(); promotionsReconcilerCfg.Enable {
+		promoEngine, err := stepplugincontroller.NewPromotionEngine(
+			kargoMgr,
+			argoCDClient,
+			credentialsDB,
+			promotion.DefaultExprDataCacheFn,
+		)
+		if err != nil {
+			return fmt.Errorf("error setting up StepPlugin promotion engine: %w", err)
+		}
 		if err := promotions.SetupReconcilerWithManager(
 			ctx,
 			kargoMgr,
 			argocdMgr,
-			promotion.NewLocalEngine(
-				kargoMgr.GetClient(),
-				argoCDClient,
-				credentialsDB,
-				promotion.DefaultExprDataCacheFn,
-			),
+			promoEngine,
 			promotionsReconcilerCfg,
 		); err != nil {
 			return fmt.Errorf("error setting up Promotions reconciler: %w", err)

@@ -948,6 +948,7 @@ func Test_calculateRequeueInterval(t *testing.T) {
 				t,
 				calculateRequeueInterval(
 					t.Context(),
+					&promotion.MockEngine{},
 					testCase.promo,
 					testCase.suggestedRequeueInterval,
 				),
