@@ -65,7 +65,7 @@ Extension-owned CRDs do not need to live in this repo.
 - `ClusterMessageChannel`
 - Slack only
 - no SMTP
-- own API group, not `ee.kargo.akuity.io`
+- use the existing `ee.kargo.akuity.io` API group
 
 `kargo-extension-send-message` also owns:
 - CRDs
