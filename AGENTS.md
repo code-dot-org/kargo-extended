@@ -1,3 +1,12 @@
+## Fork Notes
+
+- This repo is a fork of Kargo.
+- Keep as much file change as possible in `extended/`.
+- Only change files outside `extended/` as minimally as possible to reduce
+  merge conflicts with upstream.
+- Read [extended/AGENTS.md](/Users/seth/src/kargo-extended/extended/AGENTS.md)
+  and follow it as if it were part of this base `AGENTS.md`.
+
 # Kargo
 
 Kargo is a Kubernetes-native continuous promotion platform for GitOps workflows.
