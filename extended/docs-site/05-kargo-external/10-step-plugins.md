@@ -10,15 +10,15 @@ discovered at runtime.
 
 ## Enablement
 
-StepPlugins are off by default.
+StepPlugins are on by default.
 
-Enable them with the controller's existing `controller.env` escape hatch:
+Disable them with the controller's existing `controller.env` escape hatch:
 
 ```yaml
 controller:
   env:
   - name: STEP_PLUGINS_ENABLED
-    value: "true"
+    value: "false"
 ```
 
 ## Discovery
@@ -36,6 +36,9 @@ kargo-extended.code.org/configmap-type: StepPlugin
 
 Project namespace wins over `SYSTEM_RESOURCES_NAMESPACE` for the same plugin
 name.
+
+The controller watches labeled StepPlugin `ConfigMap`s and keeps an in-memory
+registry for runtime resolution.
 
 v1 rejects:
 

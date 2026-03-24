@@ -147,13 +147,6 @@ run_stepplugin_e2e_tests() {
         stepplugin_e2e_fail
     fi
 
-    run_test \
-        "Enable StepPlugins on controller" \
-        "kubectl -n $KARGO_NS set env deployment/$controller_deployment STEP_PLUGINS_ENABLED=true"
-    run_test \
-        "Wait for controller rollout after enabling StepPlugins" \
-        "kubectl -n $KARGO_NS rollout status deployment/$controller_deployment --timeout=180s"
-
     STEPPLUGIN_PLUGIN_DIR="/tmp/stepplugin-e2e-$(date +%s)"
     run_test "Create StepPlugin smoke temp dir" "mkdir -p $STEPPLUGIN_PLUGIN_DIR"
 

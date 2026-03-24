@@ -425,17 +425,20 @@ func (o *controllerOptions) setupReconcilers(
 	sharedIndexer := indexer.NewSharedFieldIndexer(kargoMgr.GetFieldIndexer())
 
 	if promotionsReconcilerCfg := promotions.ReconcilerConfigFromEnv(); promotionsReconcilerCfg.Enable {
+		promoEngine, err := stepplugincontroller.NewPromotionEngine(
+			kargoMgr,
+			argoCDClient,
+			credentialsDB,
+			promotion.DefaultExprDataCacheFn,
+		)
+		if err != nil {
+			return fmt.Errorf("error setting up StepPlugin promotion engine: %w", err)
+		}
 		if err := promotions.SetupReconcilerWithManager(
 			ctx,
 			kargoMgr,
 			argocdMgr,
-			stepplugincontroller.NewPromotionEngine(
-				kargoMgr.GetClient(),
-				kargoMgr.GetAPIReader(),
-				argoCDClient,
-				credentialsDB,
-				promotion.DefaultExprDataCacheFn,
-			),
+			promoEngine,
 			promotionsReconcilerCfg,
 		); err != nil {
 			return fmt.Errorf("error setting up Promotions reconciler: %w", err)

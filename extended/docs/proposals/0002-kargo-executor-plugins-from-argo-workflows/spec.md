@@ -152,14 +152,14 @@ spec:
 
 ## Enablement
 
-- StepPlugins are disabled by default.
+- StepPlugins are enabled by default.
 - v1 public enablement is controller env var:
 
 ```yaml
 controller:
   env:
   - name: STEP_PLUGINS_ENABLED
-    value: "true"
+    value: "false"
 ```
 
 - Minimal implementation is fine:
@@ -478,7 +478,7 @@ Enablement:
 controller:
   env:
   - name: STEP_PLUGINS_ENABLED
-    value: "true"
+    value: "false"
 ```
 
 Generated discovery `ConfigMap`:

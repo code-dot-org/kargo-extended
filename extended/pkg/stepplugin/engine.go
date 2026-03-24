@@ -37,6 +37,26 @@ func NewEngine(
 		systemResourcesNamespace,
 		enabled,
 	)
+	return NewEngineWithResolver(
+		kargoClient,
+		podReader,
+		argoCDClient,
+		credsDB,
+		cacheFunc,
+		resolver,
+	)
+}
+
+// NewEngineWithResolver builds a StepPlugin-aware engine using the provided
+// resolver.
+func NewEngineWithResolver(
+	kargoClient client.Client,
+	podReader client.Reader,
+	argoCDClient client.Client,
+	credsDB credentials.Database,
+	cacheFunc promotion.ExprDataCacheFn,
+	resolver *registry.Resolver,
+) *Engine {
 	agentRuntime := agentpod.NewRuntime(kargoClient, podReader)
 	return &Engine{
 		builtinEngine: promotion.NewLocalEngine(

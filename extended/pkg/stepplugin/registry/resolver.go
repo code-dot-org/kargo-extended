@@ -4,12 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/akuity/kargo/extended/pkg/argoworkflows/pkg/plugins/spec"
-	argoplugin "github.com/akuity/kargo/extended/pkg/argoworkflows/workflow/util/plugin"
-	stepplugincommon "github.com/akuity/kargo/extended/pkg/stepplugin/common"
 	"github.com/akuity/kargo/pkg/promotion"
 )
 
@@ -22,20 +19,39 @@ type ResolvedPluginStep struct {
 }
 
 type Resolver struct {
-	client                   client.Client
+	source                   source
 	builtinRegistry          promotion.StepRunnerRegistry
 	systemResourcesNamespace string
 	enabled                  bool
 }
 
+type source interface {
+	Plugins(ctx context.Context, namespace string) ([]*spec.Plugin, error)
+}
+
 func NewResolver(
-	kargoClient client.Client,
+	kargoClient client.Reader,
 	builtinRegistry promotion.StepRunnerRegistry,
 	systemResourcesNamespace string,
 	enabled bool,
 ) *Resolver {
 	return &Resolver{
-		client:                   kargoClient,
+		source:                   &liveSource{reader: kargoClient},
+		builtinRegistry:          builtinRegistry,
+		systemResourcesNamespace: systemResourcesNamespace,
+		enabled:                  enabled,
+	}
+}
+
+// NewWatchedResolver builds a resolver backed by a watched in-memory store.
+func NewWatchedResolver(
+	store *Store,
+	builtinRegistry promotion.StepRunnerRegistry,
+	systemResourcesNamespace string,
+	enabled bool,
+) *Resolver {
+	return &Resolver{
+		source:                   store,
 		builtinRegistry:          builtinRegistry,
 		systemResourcesNamespace: systemResourcesNamespace,
 		enabled:                  enabled,
@@ -186,7 +202,7 @@ func (r *Resolver) resolveEffectivePlugins(
 ) (map[string]*spec.Plugin, error) {
 	plugins := map[string]*spec.Plugin{}
 
-	systemPlugins, err := r.listPlugins(ctx, r.systemResourcesNamespace)
+	systemPlugins, err := r.source.Plugins(ctx, r.systemResourcesNamespace)
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +211,7 @@ func (r *Resolver) resolveEffectivePlugins(
 	}
 
 	if projectNamespace != "" && projectNamespace != r.systemResourcesNamespace {
-		projectPlugins, err := r.listPlugins(ctx, projectNamespace)
+		projectPlugins, err := r.source.Plugins(ctx, projectNamespace)
 		if err != nil {
 			return nil, err
 		}
@@ -204,44 +220,5 @@ func (r *Resolver) resolveEffectivePlugins(
 		}
 	}
 
-	return plugins, nil
-}
-
-func (r *Resolver) listPlugins(
-	ctx context.Context,
-	namespace string,
-) ([]*spec.Plugin, error) {
-	if namespace == "" {
-		return nil, nil
-	}
-	configMaps := &corev1.ConfigMapList{}
-	if err := r.client.List(
-		ctx,
-		configMaps,
-		client.InNamespace(namespace),
-		client.MatchingLabels{
-			stepplugincommon.ConfigMapLabelKey: stepplugincommon.ConfigMapLabelValue,
-		},
-	); err != nil {
-		return nil, fmt.Errorf(
-			"error listing StepPlugin ConfigMaps in namespace %q: %w",
-			namespace,
-			err,
-		)
-	}
-
-	plugins := make([]*spec.Plugin, 0, len(configMaps.Items))
-	for i := range configMaps.Items {
-		plugin, err := argoplugin.FromConfigMap(&configMaps.Items[i])
-		if err != nil {
-			return nil, fmt.Errorf(
-				"error parsing StepPlugin ConfigMap %q in namespace %q: %w",
-				configMaps.Items[i].Name,
-				configMaps.Items[i].Namespace,
-				err,
-			)
-		}
-		plugins = append(plugins, plugin)
-	}
 	return plugins, nil
 }

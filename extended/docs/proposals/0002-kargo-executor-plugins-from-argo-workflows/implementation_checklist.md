@@ -150,8 +150,8 @@ Update this as implementation teaches us things.
 ## Phase 4: Runtime Plugin Registry
 
 - [x] Add Kargo-owned discovery code under `extended/pkg/stepplugin/`.
-- [ ] Watch the Project namespace.
-- [ ] Watch `SYSTEM_RESOURCES_NAMESPACE`.
+- [x] Watch the Project namespace.
+- [x] Watch `SYSTEM_RESOURCES_NAMESPACE`.
 - [x] Resolve effective plugins by plugin name first.
 - [x] Make Project namespace win over `SYSTEM_RESOURCES_NAMESPACE`.
 - [x] Build a resolved step registry keyed by step kind.
@@ -384,12 +384,7 @@ Update this as implementation teaches us things.
 
 ## Follow-Up Plans After Initial Implementation
 
-- [ ] Decide whether v1 will keep on-demand discovery or still implement the
-      watch-based in-memory registry.
-- [ ] If v1 keeps on-demand discovery, update `proposal.md`,
-      `implementation_notes.md`, `implementation_checklist.md`, and product
-      docs to say that explicitly.
-- [ ] After the real `mkdir` proof, do a docs-versus-reality pass on:
+- [x] After the real `mkdir` proof, do a docs-versus-reality pass on:
       `extended/docs-site/05-kargo-external/10-step-plugins.md`,
       `extended/docs-site/05-kargo-external/20-step-plugin-build.md`, and
       `extended/docs-site/05-kargo-external/30-step-plugin-rpc.md`.

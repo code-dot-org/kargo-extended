@@ -38,6 +38,9 @@ The generated `ConfigMap`:
 - stores the sidecar container spec in `data["sidecar.container"]`
 - stores plugin step metadata in `data["steps.yaml"]`
 
+Once applied, the controller's StepPlugin watcher picks it up from either
+`kargo-system-resources` or the Project namespace.
+
 Example install:
 
 ```bash

@@ -4,6 +4,12 @@
 - Argo-shaped copied or adapted helpers live under
   `extended/pkg/argoworkflows/`.
 - The public CLI command is `kargo step-plugin build DIR`.
+- StepPlugins default on. `STEP_PLUGINS_ENABLED=false` disables discovery and
+  plugin execution.
+- Discovery now uses a watched in-memory StepPlugin store populated by a
+  filtered `ConfigMap` informer started from controller startup.
+- When StepPlugins are enabled, watcher bootstrap errors fail controller
+  startup.
 - The controller binary now includes `promotion-agent`.
 - Plugin-backed Promotions use a per-Promotion agent pod named
   `promotion-agent-<promotion-uid>`.
@@ -19,8 +25,6 @@
   - `/workspace`
   - `/var/run/kargo`
   - optional service account projection
-- Discovery currently resolves plugin `ConfigMap`s on demand through the
-  controller client. It does not yet maintain a watched in-memory registry.
 - The repo's existing CLI e2e harness is `pkg/cli/tests/e2e.sh`. It is already
   a large stateful shell runner, so StepPlugin smoke coverage should extend it,
   not duplicate it.
@@ -61,8 +65,8 @@
   - the remaining external code edits are already thin seams or minimal hooks
   - no further safe helper extraction was found
   - the StepPlugin smoke path in `pkg/cli/tests/e2e.sh` now passes end to end
-  - the full repo e2e script can still fail later for a separate project
-    recreate race after delete
+  - later follow-up work still found and fixed one separate project recreate
+    race in the full repo e2e harness
 - Go review on the unstaged runtime fixes found two real regression risks:
   - dropping controller `envFrom` from the agent main/init containers
   - dropping non-`EmptyDir` mounted dependencies such as secret/configmap
@@ -78,10 +82,15 @@
   - missing controller RBAC for mirrored ConfigMap and Secret create/update
   - init container trying to write to a read-only auth mount
   - in-pod `promotion-agent` blocking startup on cached cluster-scoped watches
-- The smoke path now proves the real `mkdir` example end to end, but the full
-  repo e2e script still has a later unrelated project recreate race after
-  delete.
-- The current full-repo e2e red is after the StepPlugin smoke path, in
+- A fresh temp-`KUBECONFIG` kind/Tilt cluster passed the short StepPlugin smoke
+  path with:
+  - `STEPPLUGINS_ONLY=true ./pkg/cli/tests/e2e.sh`
+- Fresh kind/Tilt here still did not create the singleton
+  `ClusterConfig/cluster` automatically.
+  - seeding that object was required before running `pkg/cli/tests/e2e.sh`
+  - this looks like an upstream-ish harness precondition, not a StepPlugin
+    bug
+- The full-repo e2e red that showed up after the StepPlugin smoke path was in
   `pkg/cli/tests/e2e.sh` section 17:
   - around line 1402 the harness deletes the test project
   - around line 1405 it waits with a fixed `sleep 15`
@@ -105,8 +114,9 @@
 - The wait polls until both of these are true:
   - the Project namespace no longer exists
   - `kargo get projects <name>` no longer finds the Project
-- After that fix, the full current repo harness passed:
-  - `Tests Passed: 238`
+- After that fix, the full current repo harness passed on the fresh temp
+  kind/Tilt cluster used for watched-discovery validation:
+  - `Tests Passed: 236`
   - `Tests Failed: 0`
 - A fresh post-green diff minimization pass was rerun against `upstream/main`
   after the harness fix.

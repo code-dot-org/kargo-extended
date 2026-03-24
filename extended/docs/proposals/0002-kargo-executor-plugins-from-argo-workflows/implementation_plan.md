@@ -509,7 +509,7 @@ Docs proof:
 ## Assumptions
 
 - `StepPlugin` is build input, not a served CRD, in v1.
-- StepPlugins are off by default and exposed publicly through env var
+- StepPlugins are on by default and can be disabled publicly through env var
   `STEP_PLUGINS_ENABLED`, usually set by the chart's existing
   `controller.env`.
 - We keep Argo's local-source `server.*` embedding behavior in v1.

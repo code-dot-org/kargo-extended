@@ -20,8 +20,8 @@ Date: 2026-03-23
 - New invented plugin surface uses `kargo-extended.code.org`.
 - Existing Akuity APIs keep their existing groups.
 - `StepPlugin` is not a real CRD in v1.
-- StepPlugins are off by default in v1 and enabled by controller env var,
-  usually through the chart's existing `controller.env`.
+- StepPlugins are on by default in v1. `STEP_PLUGINS_ENABLED` can disable them
+  through the chart's existing `controller.env`.
 - Where sane, copy Argo Workflows executor plugin code instead of rewriting it.
 - Keep real fork logic under `extended/`.
 - Keep files outside `extended/` to thin bridge edits with tests under

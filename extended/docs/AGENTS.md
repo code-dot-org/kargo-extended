@@ -48,7 +48,7 @@ Decisions:
 - When you write think linux kernel mailing list not Oracle Senior J2EE Architect writing corporate trashdocs. - 2026-03-23
 - IMPORTANT PAY ATTENTION AGENTS WHO ARE WRITING ENGLISH: write specs, plans and other md files like: linux kernel mailing list posts, or OpenBSD man pages, or Plan 9 / Bell Labs papers and docs with SQLite exactness. - 2026-03-23
 - Fork product docs for StepPlugins should live under `extended/`, be exposed to Docusaurus through a symlinked top-level `docs/docs/05-kargo-external` section, and appear before Home in the generated docs. - 2026-03-23
-- Gate StepPlugins behind a controller env var in v1 and use the existing Helm `controller.env` escape hatch. Minimal implementation is fine. - 2026-03-24
+- Default StepPlugins on in v1; keep `STEP_PLUGINS_ENABLED` as a controller env override through the existing Helm `controller.env` escape hatch. Minimal implementation is fine. - 2026-03-24
 - Name the plugin RPC wire types `StepExecuteRequest` and `StepExecuteResponse`. - 2026-03-23
 - Make the StepPlugin RPC auth contract explicit: exact token path, exact `Authorization: Bearer ...` header, and `403` on bad auth. - 2026-03-23
 - PRIMARY implementation goal: minimize both changed lines and non-contiguous edit blocks in files outside `extended/`. - 2026-03-24
