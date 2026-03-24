@@ -1,11 +1,59 @@
-## Fork Notes
+<kargo-extended>
 
-- This repo is a fork of Kargo.
-- Keep as much file change as possible in `extended/`.
+Directions inside the main `<kargo-extended></kargo-extended>` block (which we
+are in now) should supersede those in the rest of this file, as these are 
+fork-specific overrides. The rest of the file is from upstream kargo, and is
+very useful to follow, but kargo-extended fork directions have primacy if/when
+there's any konflict.
+
+# kargo-extended is a fork of kargo
+
+This repo (kargo-extended) is a fork of Kargo: https://github.com/akuity/kargo.
+The fork adds a minimal plugin / extension system, allowing "out of repo" features
+to be added to Kargo.
+
+## extended/ is our fork's primary directory
+
+- `extended/` is the fork-owned surface area. Prefer putting new work there.
+- Keep as much of code and files as possible under the `extended/` dir.
 - Only change files outside `extended/` as minimally as possible to reduce
   merge conflicts with upstream.
-- Read [extended/AGENTS.md](/Users/seth/src/kargo-extended/extended/AGENTS.md)
-  and follow it as if it were part of this base `AGENTS.md`.
+
+## Technical Proposals
+
+- Technical proposals live in `extended/docs/proposals/`.
+- When researching technical work, look for relevant past proposals first, especially
+  `trial`, `accepted` ones. You can grep proposals/ by status.yaml to find active proposals.
+- When a proposal moves between phases, update its status in `proposal.md` and
+  `status.yaml` if `status.yaml` exists.
+- Major technical initiatives done by agents should automatically write a
+  proposal under `extended/docs/proposals/`, see [section below](#implementing-new-features-and-the-proposal-process)
+- Before you start oredit a proposal ALAWYS read `extended/docs/AGENTS.md` and
+  `extended/docs/proposals/0000-proposal-directory-structure/proposal.md` FIRST
+  for notes on writing, decision logging, and style.
+- When changing a proposal's status, update both `proposal.md` and
+  `status.yaml` if `status.yaml` exists.
+- Sometimes we'll create two completing proposals and reject one after some iteration.
+
+## Implementing new Features and the Proposal Process
+
+1. For large changes ("new features"), agents should by default create a
+   proposal when we start discussing it. Ask me if you're not sure if I want a
+   proposal.
+2. Update the proposal as we discuss tradeoffs conversationally and I make
+   decisions.
+3. When I tell you to implement, make an `implementation_checklist.md`. Follow
+   proposal `0000` guidelines in
+   `extended/docs/proposals/0000-proposal-directory-structure/proposal.md`.
+4. Check off items as you go along, and update the plan if you need to as you
+   work and learn more.
+5. Add `implementation_notes.md` as you make decisions about things not in the
+   proposal that a future agent might want to know, for example file paths,
+   names, functions, architecture, and similar details.
+
+DO NOT EDIT BELOW THIS LINE OR WE WILL HAVE MERGE CONFLICTS WITH UPSTREAM KARGO
+
+</kargo-extended>
 
 # Kargo
 

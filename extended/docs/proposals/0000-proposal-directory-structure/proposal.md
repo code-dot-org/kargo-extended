@@ -9,18 +9,27 @@ Date: 2026-03-23
 - Each proposal gets its own directory under `extended/docs/proposals/`.
 - The directory name is `NNNN-short-name`.
 - `proposal.md` is required.
+- `status.yaml` is required.
 - `spec.md` is optional.
-- `plan.md` is optional.
-- `notes.md` is optional.
-- `status.yaml` is optional.
+- `implementation_checklist.md` is optional.
+- `implementation_notes.md` is optional.
 
 ## Why
 
 - Keep one proposal's docs together.
 - Avoid filename sprawl at the top level.
 - Let small proposals stay small.
-- Let larger proposals carry spec, plan, and notes without making `docs/`
+- Let larger proposals carry spec, checklist, and notes without making `docs/`
   messy.
+
+## Implementation Files
+
+- `implementation_checklist.md` is the implementation plan, written as a
+  checklist.
+- Write it so if an engineer is interrupted partway through, the next engineer
+  can see where the previous engineer left off.
+- `implementation_notes.md` is for useful implementation notes that should not
+  be shoved into the proposal or spec.
 
 ## `status.yaml`
 
