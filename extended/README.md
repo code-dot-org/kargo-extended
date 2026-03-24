@@ -1,7 +1,8 @@
 # kargo-extended
 
 `kargo-extended` **adds a PLUGIN SYSTEM** to [Kargo](https://github.com/akuity/kargo)!
-We would be very happy to merge our plugin system into upstream, if they would have us.
+
+We would be very happy to merge our plugin system into upstream, if they would have us? 🥺
 
 NOW: you can write your own plugins to kargo, e.g. in python, and they're
 very easy (see below). Plugins can be defined externally to the repo, and
