@@ -68,6 +68,34 @@ to be added to Kargo.
 - If an approach needs broad edits to a file outside `extended/`, stop and ask
   whether more of that logic can move under `extended/` first.
 
+## Running E2E Tests
+
+- If asked to run `pkg/cli/tests/e2e.sh`, first follow
+  `docs/docs/60-contributor-guide/10-hacking-on-kargo.md` for local cluster
+  and Tilt setup.
+- Prefer a temporary `KUBECONFIG` in your shell if you need to use kind for
+  e2e work and do not want to mutate the user's global kube context.
+- On a fresh kind/Tilt cluster, `pkg/cli/tests/e2e.sh` currently assumes the
+  singleton `ClusterConfig/cluster` already exists. If `kargo get
+  clusterconfig` returns `404`, seed it before running e2e:
+
+  ```bash
+  kubectl get clusterconfig.kargo.akuity.io cluster >/dev/null 2>&1 || cat <<'EOF' | kubectl apply -f -
+  apiVersion: kargo.akuity.io/v1alpha1
+  kind: ClusterConfig
+  metadata:
+    name: cluster
+  spec: {}
+  EOF
+  ```
+
+- For our kargo-extended e2e tests only, use:
+  `STEPPLUGINS_ONLY=true ./pkg/cli/tests/e2e.sh`
+- To run their upstream kargo suite without our tests, use:
+  `STEPPLUGINS_SKIP=true ./pkg/cli/tests/e2e.sh`
+- To run both e2e suites (usually do this), run:
+  `./pkg/cli/tests/e2e.sh`
+
 ## Technical Proposals
 
 - Technical proposals live in `extended/docs/proposals/`.
