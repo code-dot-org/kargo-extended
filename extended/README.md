@@ -1,9 +1,6 @@
 # kargo-extended
 
 `kargo-extended` **adds a PLUGIN SYSTEM** to [Kargo](https://github.com/akuity/kargo)!
-Unfortunately this feature requires modifying Kargo internals, so it is currently
-a fork, and is designed for sustainable long-term easy maintenance as a fork.
-
 We would be very happy to merge our plugin system into upstream, if they would have us.
 
 NOW: you can write your own plugins to kargo, e.g. in python, and they're
