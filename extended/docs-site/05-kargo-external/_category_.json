@@ -1,0 +1,9 @@
+{
+  "label": "Kargo External",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "title": "Kargo External",
+    "description": "StepPlugin docs for kargo-extended."
+  }
+}

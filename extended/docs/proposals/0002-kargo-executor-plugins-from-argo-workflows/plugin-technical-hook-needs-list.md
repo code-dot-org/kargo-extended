@@ -28,6 +28,20 @@
   - OpenTofu
   - `send-message`
 
+`cmd/controlplane/root.go`
+
+- Today:
+  - wires subcommands for the controlplane binary
+- Need:
+  - add the `promotion-agent` host command so the controller image can serve as
+    the execution host inside plugin-backed Promotion pods
+- Prefer:
+  - one import block change
+  - one `AddCommand(...)` line
+  - keep real agent logic under `extended/`
+- Needed by:
+  - plugin-backed Promotion execution
+
 `pkg/controller/promotions/promotions.go`
 
 - Today:

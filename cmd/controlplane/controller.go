@@ -19,6 +19,7 @@ import (
 
 	rollouts "github.com/akuity/kargo/api/stubs/rollouts/v1alpha1"
 	kargoapi "github.com/akuity/kargo/api/v1alpha1"
+	stepplugincontroller "github.com/akuity/kargo/extended/pkg/stepplugin/controller"
 	libargocd "github.com/akuity/kargo/pkg/argocd"
 	"github.com/akuity/kargo/pkg/controller"
 	argocd "github.com/akuity/kargo/pkg/controller/argocd/api/v1alpha1"
@@ -428,7 +429,7 @@ func (o *controllerOptions) setupReconcilers(
 			ctx,
 			kargoMgr,
 			argocdMgr,
-			promotion.NewLocalEngine(
+			stepplugincontroller.NewPromotionEngine(
 				kargoMgr.GetClient(),
 				argoCDClient,
 				credentialsDB,

@@ -37,6 +37,8 @@ type Context struct {
 	Stage string
 	// Promotion is the name of the Promotion.
 	Promotion string
+	// PromotionUID is the UID of the Promotion.
+	PromotionUID string
 	// FreightRequests is the list of Freight from various origins that is
 	// requested by the Stage targeted by the Promotion.
 	//
@@ -139,6 +141,7 @@ func NewContext(
 		Project:               promo.Namespace,
 		Stage:                 promo.Spec.Stage,
 		Promotion:             promo.Name,
+		PromotionUID:          string(promo.UID),
 		StartFromStep:         promo.Status.CurrentStep,
 		StepExecutionMetadata: promo.Status.StepExecutionMetadata,
 		State:                 State(promo.Status.GetState()),
@@ -223,6 +226,7 @@ func (c *Context) DeepCopy() Context {
 		Project:               c.Project,
 		Stage:                 c.Stage,
 		Promotion:             c.Promotion,
+		PromotionUID:          c.PromotionUID,
 		Freight:               *c.Freight.DeepCopy(),
 		TargetFreightRef:      *c.TargetFreightRef.DeepCopy(),
 		StartFromStep:         c.StartFromStep,
@@ -383,6 +387,8 @@ type StepContext struct {
 	Stage string
 	// Promotion is the name of the Promotion.
 	Promotion string
+	// PromotionUID is the UID of the Promotion.
+	PromotionUID string
 	// PromotionActor is the name of the actor triggering the Promotion.
 	PromotionActor string
 	// FreightRequests is the list of Freight from various origins that is

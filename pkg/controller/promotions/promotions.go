@@ -21,6 +21,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	kargoapi "github.com/akuity/kargo/api/v1alpha1"
+	steppluginpromotions "github.com/akuity/kargo/extended/pkg/stepplugin/promotions"
 	"github.com/akuity/kargo/pkg/api"
 	"github.com/akuity/kargo/pkg/controller"
 	argocd "github.com/akuity/kargo/pkg/controller/argocd/api/v1alpha1"
@@ -492,7 +493,12 @@ func (r *reconciler) Reconcile(
 		}
 		// Waiting for external condition: use calculated interval.
 		return ctrl.Result{
-			RequeueAfter: calculateRequeueInterval(ctx, promo, suggestedRequeueInterval),
+			RequeueAfter: calculateRequeueInterval(
+				ctx,
+				r.promoEngine,
+				promo,
+				suggestedRequeueInterval,
+			),
 		}, nil
 	}
 	return ctrl.Result{}, nil
@@ -549,14 +555,18 @@ func (r *reconciler) promote(
 
 	// Prepare promotion steps and vars for the promotion execution engine.
 	steps := promotion.NewSteps(workingPromo)
-	promoCtx := promotion.NewContext(
+	promoCtx, freshWorkDir, err := steppluginpromotions.PreparePromotionContext(
+		ctx,
+		r.promoEngine,
 		workingPromo,
 		stage,
-		promotion.WithActor(api.CreateActorAnnotationValue(&promo)),
-		promotion.WithUIBaseURL(r.cfg.APIServerBaseURL),
-		promotion.WithWorkDir(promotionWorkDir(workingPromo.UID)),
+		api.CreateActorAnnotationValue(&promo),
+		r.cfg.APIServerBaseURL,
 	)
-	if err := os.Mkdir(promoCtx.WorkDir, 0o700); err == nil {
+	if err != nil {
+		return nil, nil, err
+	}
+	if freshWorkDir {
 		// If we're working with a fresh directory, we should start the promotion
 		// process again from the beginning, but we DON'T clear shared state. This
 		// allows individual steps to self-discover that they've run before and
@@ -564,8 +574,6 @@ func (r *reconciler) promote(
 		promoCtx.StartFromStep = 0
 		promoCtx.StepExecutionMetadata = nil
 		workingPromo.Status.HealthChecks = nil
-	} else if !os.IsExist(err) {
-		return nil, nil, fmt.Errorf("error creating working directory: %w", err)
 	}
 	res, err := r.promoEngine.Promote(ctx, promoCtx, steps)
 	workingPromo.Status.Phase = res.Status
@@ -793,41 +801,14 @@ var defaultRequeueInterval = 5 * time.Minute
 
 func calculateRequeueInterval(
 	ctx context.Context,
+	engine promotion.Engine,
 	p *kargoapi.Promotion,
 	suggestedRequeueInterval *time.Duration,
 ) time.Duration {
-	requeueInterval := defaultRequeueInterval
-	if suggestedRequeueInterval != nil {
-		requeueInterval = *suggestedRequeueInterval
-	}
-
-	// Ensure we have a step for the current step index.
-	if int(p.Status.CurrentStep) >= len(p.Spec.Steps) {
-		return requeueInterval
-	}
-
-	step := p.Spec.Steps[p.Status.CurrentStep]
-	reg, err := promotion.DefaultStepRunnerRegistry.Get(step.Uses)
-	if err != nil {
-		logging.LoggerFromContext(ctx).Error(err, err.Error())
-		return requeueInterval
-	}
-	timeout := step.Retry.GetTimeout(reg.Metadata.DefaultTimeout)
-
-	// If the timeout is 0 (no timeout), we should requeue at the full interval.
-	if timeout == 0 {
-		return requeueInterval
-	}
-
-	// Ensure we have an execution metadata entry for the current step.
-	if int(p.Status.CurrentStep) >= len(p.Status.StepExecutionMetadata) {
-		return requeueInterval
-	}
-
-	md := p.Status.StepExecutionMetadata[p.Status.CurrentStep]
-	targetTimeout := md.StartedAt.Add(timeout)
-	if targetTimeout.Before(time.Now().Add(requeueInterval)) {
-		return time.Until(targetTimeout)
-	}
-	return requeueInterval
+	return steppluginpromotions.CalculateRequeueInterval(
+		ctx,
+		engine,
+		p,
+		suggestedRequeueInterval,
+	)
 }
