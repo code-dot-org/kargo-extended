@@ -222,6 +222,20 @@ kubectl_assert_not_exists() {
     fi
 }
 
+wait_for_project_deletion() {
+    local project="$1"
+
+    for _ in $(seq 1 60); do
+        if ! kubectl get namespace "$project" >/dev/null 2>&1 &&
+            ! "$KARGO_BIN" get projects "$project" $KARGO_FLAGS >/dev/null 2>&1; then
+            return 0
+        fi
+        sleep 2
+    done
+
+    return 1
+}
+
 # Use kubectl to verify a field value in a Kubernetes resource
 kubectl_assert_field() {
     local description="$1"
@@ -1408,8 +1422,7 @@ kubectl_assert_not_exists "Shared repo credentials deleted" "secret" "$TEST_SHAR
 # Delete test project after ConfigMap and Credentials tests
 $KARGO_BIN delete project $TEST_PROJECT $KARGO_FLAGS 2>/dev/null || true
 
-# Wait for project deletion to complete (namespace finalizers take time)
-sleep 15
+run_test "Wait for project deletion to complete" "wait_for_project_deletion $TEST_PROJECT"
 
 # =============================================================================
 # 17. PROJECT CONFIG TESTS

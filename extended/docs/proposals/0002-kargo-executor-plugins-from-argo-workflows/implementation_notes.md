@@ -98,3 +98,21 @@
   full project or namespace disappearance before recreating the test project.
 - This looks like a pre-existing repo harness race, not a StepPlugin-specific
   failure, because the new smoke path already passed before the later red.
+- The full current `pkg/cli/tests/e2e.sh` was rerun after reproducing that
+  exact red.
+- The fix was a small `wait_for_project_deletion()` helper in
+  `pkg/cli/tests/e2e.sh` plus replacing the fixed `sleep 15` with a real wait.
+- The wait polls until both of these are true:
+  - the Project namespace no longer exists
+  - `kargo get projects <name>` no longer finds the Project
+- After that fix, the full current repo harness passed:
+  - `Tests Passed: 238`
+  - `Tests Failed: 0`
+- A fresh post-green diff minimization pass was rerun against `upstream/main`
+  after the harness fix.
+- Result of that follow-up minimization pass:
+  - the extra `pkg/cli/tests/e2e.sh` helper and call site were small enough
+    and clearer than trying to hide the wait in a stranger shell construct
+  - no further safe shrink was found for the `pkg/cli/tests/e2e.sh` external
+    seam
+- A fresh Go review/fix loop after the harness fix found no new Go findings.

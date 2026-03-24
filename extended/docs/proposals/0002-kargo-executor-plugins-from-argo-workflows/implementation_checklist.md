@@ -348,15 +348,15 @@ Update this as implementation teaches us things.
 
 ## Phase 12: Full Repo E2E Harness Stabilization
 
-- [ ] Reproduce the current full `pkg/cli/tests/e2e.sh` failure after the
+- [x] Reproduce the current full `pkg/cli/tests/e2e.sh` failure after the
       StepPlugin smoke path passes.
-- [ ] Confirm whether the red is still the test-project delete/recreate race in
+- [x] Confirm whether the red is still the test-project delete/recreate race in
       section 17.
-- [ ] Make the harness wait for real project or namespace deletion instead of
+- [x] Make the harness wait for real project or namespace deletion instead of
       relying on a fixed `sleep 15`.
-- [ ] Keep the external edit in `pkg/cli/tests/e2e.sh` as small as possible.
-- [ ] Re-run full `pkg/cli/tests/e2e.sh` to green.
-- [ ] After the harness fix, rerun the post-green outside-`extended/` diff
+- [x] Keep the external edit in `pkg/cli/tests/e2e.sh` as small as possible.
+- [x] Re-run full `pkg/cli/tests/e2e.sh` to green.
+- [x] After the harness fix, rerun the post-green outside-`extended/` diff
       minimization pass again.
 
 ## Product Docs
