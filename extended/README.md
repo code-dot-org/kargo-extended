@@ -21,8 +21,23 @@ We would be very happy to merge our plugin system into upstream, if they would h
 
 ## Quick Start: `mkdir` StepPlugin
 
-This is the minimal `mkdir` example from
-`extended/docs/proposals/0002-kargo-executor-plugins-from-argo-workflows/proposal.md`.
+In this quick start, we'll implement a `mkdir` StepPlugin that you can
+use during the promotion step of a real Stage.
+
+```yaml
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+spec:
+  promotionTemplate:
+    spec:
+      steps:
+      - uses: mkdir
+        config:
+          path: demo/subdir
+...
+```
+
+First, install `kargo-extended`, which might mean building it atm.
 
 Create a work directory:
 
@@ -38,6 +53,8 @@ apiVersion: kargo-extended.code.org/v1alpha1
 kind: StepPlugin
 metadata:
   name: mkdir
+  # Note: must be installed to either this namespace for whole-kargo
+  # usage, or to one of your Kargo project namespaces.
   namespace: kargo-system-resources
 spec:
   sidecar:
@@ -86,23 +103,26 @@ class MkdirHandler(BaseHTTPRequestHandler):
 HTTPServer(("", 9765), MkdirHandler).serve_forever()
 ```
 
-Build and install it:
+Build and install it to your cluster:
 
 ```bash
 kargo step-plugin build .
 kubectl apply -f mkdir-step-plugin-configmap.yaml
 ```
 
-Use it in a `Stage`:
+Now you can use it in a `Stage` or `PromotionTask`:
 
 ```yaml
+apiVersion: kargo.akuity.io/v1alpha1
+kind: PromotionTask
+metadata:
+  name: mkdir-demo
+  namespace: kargo-demo
 spec:
-  promotionTemplate:
-    spec:
-      steps:
-      - uses: mkdir
-        config:
-          path: demo/subdir
+  steps:
+  - uses: mkdir
+    config:
+      path: demo/subdir
 ```
 
 ## 95% of fork-specific code lives in [`extended/`](./extended/)
