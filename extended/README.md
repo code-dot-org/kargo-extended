@@ -1,16 +1,25 @@
 # kargo-extended
 
-`kargo-extended` is a fork of Kargo.
+`kargo-extended` **adds a PLUGIN SYSTEM** to [Kargo](https://github.com/akuity/kargo)!
+Unfortunately this feature requires modifying Kargo internals, so it is currently
+a fork, and is designed for sustainable long-term easy maintenance as a fork.
 
-It exists to carry fork-owned features, starting with runtime-loaded
-StepPlugins, without turning the upstream tree inside out.
+We would be very happy to merge our plugin system into upstream, if they would have us.
 
-As much of the fork's code, docs, and test logic as possible live under
-[`extended/`](./extended/). Files outside that directory should stay thin when
-they can: wiring, bridges, small chart changes, and similar seams.
+NOW: you can write your own plugins to kargo, e.g. in python, and they're
+very easy (see below). Plugins can be defined externally to the repo, and
+are defined as Kubernetes objects.
 
-The repo-root `README.md` is a symlink to this file. Treat this file as the
-fork homepage.
+In particular, you can now defined new steps, for use in promotions, like:
+- mkdir
+- create-yaml
+- transmogrify-world
+- post-to-my-internal-system
+- etc.
+
+We based our plugin system on [Argo Workflow's ExecutorPlugins](https://argo-workflows.readthedocs.io/en/latest/executor_plugins/),
+as in, literally, we used a lot of their source code. This gave us a well thought
+out model to start from.
 
 ## Quick Start: `mkdir` StepPlugin
 
@@ -97,6 +106,15 @@ spec:
         config:
           path: demo/subdir
 ```
+
+## 95% of fork-specific code lives in [`extended/`](./extended/)
+
+As much of the fork's code, docs, and test logic as possible live under
+[`extended/`](./extended/). Files outside that directory should stay thin when
+they can: wiring, bridges, small chart changes, and similar seams.
+
+The repo-root `README.md` is a symlink to this file. Treat this file as the
+fork homepage.
 
 ## What Lives Here
 
