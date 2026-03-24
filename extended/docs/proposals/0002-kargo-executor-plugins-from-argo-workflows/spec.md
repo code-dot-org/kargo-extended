@@ -8,9 +8,9 @@
   into the controller binary.
 - OpenTofu and `send-message` are the first plugin targets.
 - Read
-  [Required Host Hooks](../../plugin-technical-hook-needs-list.md#required-host-hooks)
+  [Required Host Hooks](./plugin-technical-hook-needs-list.md#required-host-hooks)
   and
-  [Main Technical Constraint](../../plugin-technical-hook-needs-list.md#main-technical-constraint)
+  [Main Technical Constraint](./plugin-technical-hook-needs-list.md#main-technical-constraint)
   before touching host code. Those sections are required reading for this spec.
 
 ## Rules
@@ -175,12 +175,12 @@ and referenced `Secret`s itself.
 ## Host Surface
 
 This spec depends on these sections in
-[plugin-technical-hook-needs-list.md](../../plugin-technical-hook-needs-list.md):
+[plugin-technical-hook-needs-list.md](./plugin-technical-hook-needs-list.md):
 
-- [Required Host Hooks](../../plugin-technical-hook-needs-list.md#required-host-hooks)
-- [Existing Behavior We Can Keep](../../plugin-technical-hook-needs-list.md#existing-behavior-we-can-keep)
-- [Plugin-Owned, Not Host Hooks](../../plugin-technical-hook-needs-list.md#plugin-owned-not-host-hooks)
-- [Feature Minimums](../../plugin-technical-hook-needs-list.md#feature-minimums)
+- [Required Host Hooks](./plugin-technical-hook-needs-list.md#required-host-hooks)
+- [Existing Behavior We Can Keep](./plugin-technical-hook-needs-list.md#existing-behavior-we-can-keep)
+- [Plugin-Owned, Not Host Hooks](./plugin-technical-hook-needs-list.md#plugin-owned-not-host-hooks)
+- [Feature Minimums](./plugin-technical-hook-needs-list.md#feature-minimums)
 
 Read them. They are not optional background.
 

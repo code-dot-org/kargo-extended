@@ -31,7 +31,7 @@ Decisions:
 - `kargo-extension-send-message` does not include SMTP. - 2026-03-23
 - Preserve the user's style: crisp is better than verbose. - 2026-03-23
 - Strong preference: find a simple implementation that allows extensions to be added to `kargo-extended` without having to add them at build time, if that can be done sanely. - 2026-03-23
-- Keep `extended/docs/plugin-technical-hook-needs-list.md` up to date with external source-code touchpoints outside `extended/` that the extension point system needs to hook into. - 2026-03-23
+- Keep `extended/docs/proposals/0002-kargo-executor-plugins-from-argo-workflows/plugin-technical-hook-needs-list.md` up to date with external source-code touchpoints outside `extended/` that the extension point system needs to hook into. - 2026-03-23
 - Inspect Argo Workflows executor plugins for patterns and code we can copy, because it is adjacent in the ecosystem and people already know the model. - 2026-03-23
 - If we follow the Argo Workflows model, call the pluggable units "plugins" rather than "extensions", but keep `kargo-extended` as the fork name. - 2026-03-23
 - We are doing this because the Argo Workflows executor plugin model is already known in the ecosystem, close to Kargo semantically, and likely less work than inventing our own plugin system from scratch. - 2026-03-23

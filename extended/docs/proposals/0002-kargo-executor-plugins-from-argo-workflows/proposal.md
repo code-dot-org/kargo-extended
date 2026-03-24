@@ -71,5 +71,5 @@ Scaffold only:
 - [Execution Model](./spec.md#execution-model)
 - [RPC](./spec.md#rpc)
 - [Example Plugin Specs](./spec.md#example-plugin-specs)
-- [Required Host Hooks](../../plugin-technical-hook-needs-list.md#required-host-hooks)
-- [Main Technical Constraint](../../plugin-technical-hook-needs-list.md#main-technical-constraint)
+- [Required Host Hooks](./plugin-technical-hook-needs-list.md#required-host-hooks)
+- [Main Technical Constraint](./plugin-technical-hook-needs-list.md#main-technical-constraint)
