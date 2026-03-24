@@ -1,6 +1,6 @@
 # kargo-extended
 
-`kargo-extended` **adds a PLUGIN SYSTEM** to [Kargo](https://github.com/akuity/kargo)!
+`kargo-extended` modifies [kargo](https://github.com/akuity/kargo)! to **add a RUNTIME PLUGIN SYSTEM**.
 
 We would be very happy to merge our plugin system into upstream, if they would have us? 🥺
 
