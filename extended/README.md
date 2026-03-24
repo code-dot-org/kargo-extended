@@ -125,28 +125,6 @@ spec:
       path: demo/subdir
 ```
 
-## 95% of fork-specific code lives in [`extended/`](./extended/)
-
-As much of the fork's code, docs, and test logic as possible live under
-[`extended/`](./extended/). Files outside that directory should stay thin when
-they can: wiring, bridges, small chart changes, and similar seams.
-
-The repo-root `README.md` is a symlink to this file. Treat this file as the
-fork homepage.
-
-## What Lives Here
-
-- `docs/`
-  - fork docs and proposal directories
-- `docs-site/`
-  - fork product docs exposed through the main Docusaurus site
-- `pkg/argoworkflows/`
-  - copied or adapted Argo executor-plugin helpers and types
-- `pkg/stepplugin/`
-  - the host-side StepPlugin implementation
-- `tests/`
-  - fork-owned e2e helpers
-
 ## StepPlugin Architecture
 
 The current fork feature is runtime-loaded `StepPlugin`s modeled on Argo
@@ -164,7 +142,29 @@ High-level flow:
 7. Builtin and plugin steps share `/workspace`.
 8. RPC auth uses bearer tokens under `/var/run/kargo`.
 
-Main packages:
+## 95% of fork-specific code lives in [`extended/`](./extended/)
+
+As much of the fork's code, docs, and test logic as possible live under
+[`extended/`](./extended/). Files outside that directory should stay thin when
+they can: wiring, bridges, small chart changes, and similar seams.
+
+The repo-root `README.md` is a symlink to this file. Treat this file as the
+fork homepage.
+
+### What Lives in extended/
+
+- `docs/`
+  - fork docs and proposal directories
+- `docs-site/`
+  - fork product docs exposed through the main Docusaurus site
+- `pkg/argoworkflows/`
+  - copied or adapted Argo executor-plugin helpers and types
+- `pkg/stepplugin/`
+  - the host-side StepPlugin implementation
+- `tests/`
+  - fork-owned e2e helpers
+
+Main packages in extended/:
 
 - `pkg/stepplugin/cli/`
   - `kargo step-plugin` command wiring
