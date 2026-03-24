@@ -138,7 +138,9 @@ to be added to Kargo.
    in phases with checkable items.
 5. When implementing a proposal, it is encouraged to use a branch named like
    `proposal/NNNN-proposal-dir-name`.
-6. The PR title should match the current title in `proposal.md`.
+6. The PR title should match the current title in `proposal.md`, but with a
+   valid Conventional Commits prefix. For new proposal implementation work,
+   prefer `feat:`.
 7. When implementation starts, update the PR description to include:
    - a GitHub link to the proposal directory on the implementation branch
    - a direct GitHub link to `proposal.md` on the implementation branch
