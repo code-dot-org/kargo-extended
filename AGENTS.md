@@ -1,3 +1,221 @@
+<kargo-extended>
+
+IMPORTANT PAY ATTENTION AGENTS WHO ARE WRITING ENGLISH: write in chat, and in
+specs, plans and other md files like: linux kernel mailing list posts, or
+OpenBSD man pages, or Plan 9 / Bell Labs papers and docs with SQLite exactness.
+
+Directions inside the main `<kargo-extended></kargo-extended>` block (which we
+are in now) should supersede those in the rest of this file, as these are
+fork-specific overrides. The rest of the file is from upstream kargo, and is
+very useful to follow, but kargo-extended fork directions have primacy if/when
+there's any konflict.
+
+# kargo-extended is a fork of kargo
+
+This repo (kargo-extended) is a fork of Kargo: https://github.com/akuity/kargo.
+The fork adds a minimal plugin / extension system, allowing "out of repo" features
+to be added to Kargo.
+
+## extended/ is our fork's primary directory
+
+- `extended/` is the fork-owned surface area. Prefer putting new work there.
+- Keep as much of code and files as possible under the `extended/` dir.
+- Only change files outside `extended/` as minimally as possible to reduce
+  merge conflicts with upstream.
+
+## Merge Conflict Discipline Avoidance OUTSIDE `extended/`: keep it short by importing code from `extended/`
+
+- PRIMARY GOAL DURING ALL IMPLEMENTATIONS: minimize both total changed lines and the number of
+  non-contiguous edit blocks in files outside `extended/`.
+- Agents should remember that re-implementation of complex systems carries a
+  high risk of breakage not by merge commits, but by compatibility failing
+  with upstream.
+- Thus, the perfect edit minimizes lines, balanced by minimizing complexity
+  that has to match between Kargo code and our code.
+- This is a balance, not an absolute.
+- Prefer the smallest reasonable design, not the smallest outside diff at any
+  cost.
+- Do not re-implement complex upstream subsystems under `extended/` just to
+  avoid a small or stable upstream edit.
+- Prefer thin bridge edits outside `extended/`.
+- A thin bridge edit is a small edit in a file outside `extended/` whose job is
+  only to wire, delegate, or inject, connecting to the real code in a helper
+  file under `extended/`, usually named like `<upstream_basename>_bridge.go`.
+  Shift as much code as possible out of the non-`extended/` file and into that
+  helper file. This will look different from normal upstream code, and that is
+  fine. We are not upstream Kargo. We are optimizing for avoiding merge
+  conflicts.
+- When touching a file outside `extended/`, do not optimize for making that
+  file look like perfect upstream-owned code. Optimize for the fewest edits
+  likely to conflict on future upstream rebases.
+- Put real logic, helpers, adapters, and new types in libraries under
+  `extended/` whenever Go package boundaries allow it.
+- Load code from `extended/` helper libraries instead of defining new logic in
+  files outside `extended/`.
+- Expect each edited file outside `extended/` to have a corresponding helper or
+  adapter in `extended/` when that reduces merge-conflict risk.
+- For every feature seam that forces an edit outside `extended/`, add tests
+  under `extended/` that verify the behavior behind that seam.
+- Treat those `extended/` tests as the safety net for future merge-conflict
+  repairs in files outside `extended/`.
+- After making an external edit work, do an explicit follow-up pass:
+  - ask how many of those edits can be removed by moving more logic behind an
+    `extended/` helper
+  - shrink the outside-`extended/` diff if that is practical
+- After editing a file outside `extended/`, compare it against upstream Kargo
+  and look for a better whole-file strategy that reduces total diff size and
+  edit-block count.
+- After resolving a merge conflict in a file outside `extended/`, run the
+  corresponding `extended/` tests before trusting the merge.
+- Treat this like code golf for external files: iterate on how little you need
+  to change relative to upstream, but don't do anything too weird like boil the ocean.
+- If an approach needs broad edits to a file outside `extended/`, stop and ask
+  whether more of that logic can move under `extended/` first.
+
+## Technical Proposals
+
+- Technical proposals live in `extended/docs/proposals/`.
+- When researching technical work, look for relevant past proposals first, especially
+  `trial`, `accepted` ones. You can grep proposals/ by status.yaml to find active proposals.
+- When a proposal moves between phases, update its status in `proposal.md` and
+  `status.yaml` if `status.yaml` exists.
+- Major technical initiatives done by agents should automatically write a
+  proposal under `extended/docs/proposals/`, see [section below](#implementing-new-features-and-the-proposal-process)
+- Before you start oredit a proposal ALAWYS read `extended/docs/AGENTS.md` and
+  `extended/docs/proposals/0000-proposal-directory-structure/proposal.md` FIRST
+  for notes on writing, decision logging, and style.
+- When changing a proposal's status, update both `proposal.md` and
+  `status.yaml` if `status.yaml` exists.
+- Sometimes we'll create two completing proposals and reject one after some iteration.
+- @Codex: linking to proposals in chat (good when you refer to them!), make the text
+  of the link [$proposal_dirname]($path_to_proposal_md), NOT [proposal.md]($path_to_proposal.md).
+  I have to haver to see the path overwise and I can't tell which proposal it is.
+  Example DO: [0000-proposal-directory-structure](extended/docs/proposals/00000-proposal-directory-structure/proposal.md)
+- Keep in mind "what's the current proposal?" and "what are we working on?". We might make
+  detours, and it can be very helpful to help me remember what we're up to if
+  I ask.
+- If we seem to be heading in a new direction, after some exploring, it can be
+  very helpful to ask me questions like "Want to start a new proposal for this?"
+- Remember, multiple proposals might be worked on in different chats/agents at once
+  so keep track in your context any proposal (or proposals!) we are working on. Its
+  Important to preserve these memories when compacting context!!!!
+
+## Implementing new Features and the Proposal Process
+
+1. For large changes ("new features"), agents should by default create a
+   proposal when we start discussing it. Ask me if you're not sure if I want a
+   proposal.
+2. Update the proposal as we discuss tradeoffs conversationally and I make
+   decisions.
+3. When I tell you to implement, write `implementation_plan.md` first. Follow
+   proposal `0000` guidelines in
+   `extended/docs/proposals/0000-proposal-directory-structure/proposal.md`.
+4. Derive `implementation_checklist.md` from `implementation_plan.md`. Write it
+   in phases with checkable items.
+5. When implementing a proposal, it is encouraged to use a branch named like
+   `proposal/NNNN-proposal-dir-name`.
+6. The PR title should match the current title in `proposal.md`.
+7. When implementation starts, update the PR description to include:
+   - a GitHub link to the proposal directory on the implementation branch
+   - a direct GitHub link to `proposal.md` on the implementation branch
+   - the proposal text if useful once implementation is underway
+8. If a PR is opened during proposal writing, do not churn its description
+   until implementation starts.
+9. If implementation is requested and no PR exists yet, ask whether you should
+   create a PR and a proposal-named branch. Then suggest continuing in a fresh
+   agent or fresh context on that branch.
+10. Update both plan and checklist as you go when new information changes the
+   shape of the work, especially `implementation_checklist.md`.
+11. Add `implementation_notes.md` as you make decisions about things not in the
+   proposal that a future agent might want to know, for example file paths,
+   names, functions, architecture, and similar details.
+
+## Recommended Phase To Add To All implementation_plans.md
+
+If an implementation edits any file outside `extended/` (or you could imagine
+it might by the time feature work is done), its
+`implementation_plan.md` should probably include this at the end, and the
+derived `implementation_checklist.md` should mirror it, with a phase named
+exactly:
+
+`Phase Post-Green: Minimize Diff Of Files Outside ./extended Against Kargo Upstream`
+
+Use this procedure:
+
+1. Get the feature green first.
+   Start from a working tree where the relevant tests already pass. Do not do
+   this phase first.
+2. Use the real upstream Kargo history as the comparison base.
+   Preferred remote is `upstream`. Preferred branch is `upstream/main`. If
+   `upstream` does not exist, add the Akuity Kargo remote first.
+3. Fetch before reviewing diffs.
+   Run `git fetch upstream` so the comparison base is current enough.
+4. Review every file outside `extended/` that was edited for this feature.
+   For each one:
+   - diff it against `upstream/main`
+   - count changed lines
+   - count non-contiguous edit blocks
+5. Re-evaluate each outside-`extended/` edit now that the full feature works.
+   Ask:
+   - which edits were only convenient while building, but are no longer needed
+   - which edits can move behind helpers or adapters under `extended/`
+   - whether a different whole-file strategy collapses two blocks into one or
+     removes a block entirely
+6. If the file already had pre-existing fork drift against upstream, still do
+   this pass.
+   The goal is not only to minimize new edits. The goal is to see whether your
+   work can ride the existing drift more cleanly or shrink the whole-file diff.
+   Do not rewrite unrelated drift unless that really reduces the fork diff and
+   stays safe.
+7. Optimize for fewer merge-conflict surfaces, not prettier upstream-owned
+   files.
+   Prefer one small ugly bridge over a broad pretty rewrite.
+8. Balance diff reduction against compatibility risk.
+   Do not create large duplicate subsystems under `extended/` just to avoid a
+   small upstream edit. If avoiding an upstream edit requires substantial
+   parallel orchestration or behavior that must track upstream closely, the
+   upstream edit may be the safer choice.
+9. After every cleanup pass on an outside-`extended/` file:
+   - rerun the matching tests under `extended/`
+   - rerun any broader targeted tests affected by that seam
+   - if the cleanup makes the diff worse or the code less obvious, back it out
+10. End this phase only when:
+   - no obvious helper extraction remains
+   - no obvious edit block can be collapsed or removed
+   - the matching `extended/` tests are green again
+
+
+@CODEX: if you are reading this you must RIGHT NOW: find the current active
+proposal, if any, especially if its being implemented (check
+the implementation_checklist.md files). RIGHT NOW, read all associated files
+with this proposal. Also, RIGHT NOW, please read in extended/docs/AGENTS.md
+which contains tips on the type of writing we expect in chats and in MD files
+you write. Think OpenBSD man pages or LKML posts, not corporate Oracle J2EE
+architect longdoc blather. Clean, detailed, terse.
+
+@CODEX: if you are implementing a proposal, and you notice its been a long
+time since you last read the proposal docs (they are far back in your
+context), RE-READ the proposal and all its docs.
+
+@CODEX: if you are working on writing or editing or refining a proposal,
+periodically re-read extended/docs/AGENTS.md to re-emphasize the writing
+style we expect, and keep it near the top of your mind/context.
+
+- If you are trying to run e2e tests in this repo, see
+  `docs/docs/60-contributor-guide/10-hacking-on-kargo.md` first for local
+  cluster and Tilt setup.
+- If you only need the fork StepPlugin smoke path, run
+  `STEPPLUGINS_ONLY=true ./pkg/cli/tests/e2e.sh` after that setup.
+- `README.md` at the repo root is intentionally a symlink to
+  `extended/README.md`.
+- Upstream `README.md` changes will likely conflict on rebases or merges.
+- In this fork, keep `README.md` as that symlink and ignore upstream content
+  churn there unless the user explicitly asks otherwise.
+
+DO NOT EDIT BELOW THIS LINE OR WE WILL HAVE MERGE CONFLICTS WITH UPSTREAM KARGO
+
+</kargo-extended>
+
 # Kargo
 
 Kargo is a Kubernetes-native continuous promotion platform for GitOps workflows.
