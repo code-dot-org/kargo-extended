@@ -1,6 +1,6 @@
 # kargo-extended
 
-`kargo-extended` modifies [kargo](https://github.com/akuity/kargo)! to **add a RUNTIME PLUGIN SYSTEM**.
+`kargo-extended` modifies [kargo](https://github.com/akuity/kargo) to **add a RUNTIME PLUGIN SYSTEM**!
 
 It lets you can write your own plugins to kargo, e.g. in python, and they're
 very easy (see below). Plugins can be defined externally to the repo, and
