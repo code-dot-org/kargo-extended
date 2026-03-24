@@ -1,5 +1,9 @@
 <kargo-extended>
 
+IMPORTANT PAY ATTENTION AGENTS WHO ARE WRITING ENGLISH: write in chat, and in
+specs, plans and other md files like: linux kernel mailing list posts, or
+OpenBSD man pages, or Plan 9 / Bell Labs papers and docs with SQLite exactness.
+
 Directions inside the main `<kargo-extended></kargo-extended>` block (which we
 are in now) should supersede those in the rest of this file, as these are 
 fork-specific overrides. The rest of the file is from upstream kargo, and is
