@@ -2,9 +2,7 @@
 
 `kargo-extended` modifies [kargo](https://github.com/akuity/kargo)! to **add a RUNTIME PLUGIN SYSTEM**.
 
-We would be very happy to merge our plugin system into upstream, if they would have us? 🥺
-
-NOW: you can write your own plugins to kargo, e.g. in python, and they're
+It lets you can write your own plugins to kargo, e.g. in python, and they're
 very easy (see below). Plugins can be defined externally to the repo, and
 are defined as Kubernetes objects.
 
@@ -15,9 +13,11 @@ In particular, you can now defined new steps, for use in promotions, like:
 - post-to-my-internal-system
 - etc.
 
-We based our plugin system on [Argo Workflow's ExecutorPlugins](https://argo-workflows.readthedocs.io/en/latest/executor_plugins/),
-as in, literally, we used a lot of their source code. This gave us a well thought
+Technically, we based our plugin system on [Argo Workflow's ExecutorPlugins](https://argo-workflows.readthedocs.io/en/latest/executor_plugins/),
+as in, literally, we used a lot of Argo Workflow source code. This gave us a well thought
 out model to start from.
+
+We would be very happy to merge our plugin system into upstream, if they would have us? 🥺
 
 ## Quick Start: `mkdir` StepPlugin
 
