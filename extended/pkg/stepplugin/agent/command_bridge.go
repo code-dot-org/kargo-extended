@@ -176,13 +176,9 @@ func newKargoClient(ctx context.Context) (ctrlclient.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	client, err := kubernetes.NewClient(
-		ctx,
+	client, err := ctrlclient.New(
 		restCfg,
-		kubernetes.ClientOptions{
-			SkipAuthorization: true,
-			Scheme:            scheme,
-		},
+		ctrlclient.Options{Scheme: scheme},
 	)
 	if err != nil {
 		return nil, err

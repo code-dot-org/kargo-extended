@@ -12,12 +12,14 @@ import (
 
 func NewPromotionEngine(
 	kargoClient client.Client,
+	podReader client.Reader,
 	argoCDClient client.Client,
 	credsDB credentials.Database,
 	cacheFunc promotion.ExprDataCacheFn,
 ) promotion.Engine {
 	return stepplugin.NewEngine(
 		kargoClient,
+		podReader,
 		argoCDClient,
 		credsDB,
 		cacheFunc,

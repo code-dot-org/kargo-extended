@@ -204,14 +204,41 @@ Update this as implementation teaches us things.
 
 ## Phase 7: First Deliverable Boundary
 
-- [ ] Build the documented `mkdir` plugin example.
-- [ ] Generate the documented `mkdir` discovery `ConfigMap`.
-- [ ] Install it into `kargo-system-resources` or a Project namespace.
-- [ ] Prove discovery works.
-- [ ] Prove a `Stage` can run `uses: mkdir`.
+- [x] Build the documented `mkdir` plugin example.
+- [x] Generate the documented `mkdir` discovery `ConfigMap`.
+- [x] Install it into `kargo-system-resources` or a Project namespace.
+- [x] Prove discovery works.
+- [x] Prove a `Stage` can run `uses: mkdir`.
 - [x] Keep OpenTofu and `send-message` out of this repo's first host slice.
 - [x] Reach roughly Argo executor plugin doc depth by copying and rewriting
       where that keeps work small.
+
+## Phase 8: Repo Smoke-Test Harness
+
+- [x] Add fork-owned smoke coverage at `extended/tests/e2e_stepplugins.sh`.
+- [x] Source or call it unconditionally from `pkg/cli/tests/e2e.sh`.
+- [x] Keep the external edit in `pkg/cli/tests/e2e.sh` to one tiny block.
+- [x] Reuse the existing e2e shell helpers, login flow, and cluster setup
+      assumptions instead of duplicating that script.
+- [x] Build the documented `mkdir` example from the smoke flow.
+- [x] Apply the generated `ConfigMap` from the smoke flow.
+- [x] Run a `Stage` with `uses: mkdir` from the smoke flow.
+- [x] Add a later builtin step that fails if the plugin-created directory is
+      missing from shared `/workspace`.
+- [x] Make the smoke test fail if shared-workdir proof is missing.
+
+## Phase 8A: Agent Dependency Carryover
+
+- [x] Preserve controller `envFrom` dependencies needed by plugin-backed
+      builtin steps.
+- [x] Preserve controller-mounted secret/configmap dependencies needed by
+      plugin-backed builtin steps.
+- [x] Carry those dependencies into the promotion namespace in a
+      namespace-safe way.
+- [x] Keep mirrored dependency object ownership on the `Promotion` so cleanup
+      is automatic.
+- [x] Add tests covering mirrored `envFrom` carryover.
+- [x] Add tests covering mirrored secret/configmap volume carryover.
 
 ## Tests
 
@@ -227,7 +254,10 @@ Update this as implementation teaches us things.
 - [x] Test that StepPlugin disablement leaves builtin-only behavior alone.
 - [x] Controller tests for local vs agent execution path.
 - [x] Agent tests for shared workdir and token mounts.
-- [ ] End-to-end `mkdir` proof from `Stage`.
+- [x] End-to-end `mkdir` proof from `Stage`.
+- [x] Repo e2e harness sources `extended/tests/e2e_stepplugins.sh`.
+- [x] Repo e2e smoke flow proves a later builtin step can see the
+      plugin-created directory in shared `/workspace`.
 - [x] `extended/pkg/stepplugin/cli/root_bridge_test.go` covers the CLI bridge.
 - [x] `extended/pkg/stepplugin/controller/controller_bridge_test.go` covers the
       controller bridge.
@@ -242,7 +272,7 @@ Update this as implementation teaches us things.
 - [x] `extended/pkg/stepplugin/executor/wiretypes_test.go` covers
       internal-to-wire adaptation.
 
-## Phase 8: Post-Green External Diff Minimization
+## Phase 9: Post-Green External Diff Minimization
 
 1. Comparison base
    - [x] Get the feature working first.
@@ -273,6 +303,61 @@ Update this as implementation teaches us things.
          `extended/` tests.
    - [x] After cleanup, rerun broader targeted tests that touch those seams.
    - [x] Matching `extended/` tests are green again.
+6. Result of the minimization pass
+   - [x] The remaining code edits outside `extended/` are all thin seams or
+         minimal chart/e2e hooks.
+   - [x] No further safe helper extraction was found for
+         `cmd/cli/root.go`.
+   - [x] No further safe helper extraction was found for
+         `cmd/controlplane/controller.go`.
+   - [x] No further safe helper extraction was found for
+         `cmd/controlplane/root.go`.
+   - [x] No further safe helper extraction was found for
+         `pkg/controller/promotions/promotions.go`.
+   - [x] No further safe shrink was found for the chart RBAC edit in
+         `charts/kargo/templates/controller/cluster-roles.yaml`.
+   - [x] No further safe shrink was found for the e2e hook in
+         `pkg/cli/tests/e2e.sh`.
+
+## Phase 10: Post-Green External Diff Minimization
+
+1. Comparison base
+   - [x] Get the new fixes working first.
+   - [x] Get the relevant tests green first.
+   - [x] `git fetch upstream`.
+2. Measure the current outside-`extended/` diff
+   - [x] Review every file edited outside `extended/` by these fixes.
+   - [x] Diff each edited external file against `upstream/main`.
+   - [x] Count changed lines and non-contiguous edit blocks in each.
+3. Try to shrink each spicy file
+   - [x] Move any avoidable logic behind `extended/` helpers.
+   - [x] Re-check whether any outside-`extended/` edit can be removed entirely.
+   - [x] See if a better whole-file strategy reduces edit blocks or total diff
+         size.
+4. Re-test after cleanup
+   - [x] Rerun the matching `extended/` tests.
+   - [x] Rerun broader targeted tests that touch those seams.
+5. End state
+   - [x] Record whether any further safe shrink was found.
+
+## Phase 11: Go Review And Fix Loop
+
+- [x] Review the new unstaged Go changes with a bug/risk/regression mindset.
+- [x] Fix any review findings that are worth the added complexity.
+- [x] Re-run targeted tests after review fixes.
+
+## Phase 12: Full Repo E2E Harness Stabilization
+
+- [ ] Reproduce the current full `pkg/cli/tests/e2e.sh` failure after the
+      StepPlugin smoke path passes.
+- [ ] Confirm whether the red is still the test-project delete/recreate race in
+      section 17.
+- [ ] Make the harness wait for real project or namespace deletion instead of
+      relying on a fixed `sleep 15`.
+- [ ] Keep the external edit in `pkg/cli/tests/e2e.sh` as small as possible.
+- [ ] Re-run full `pkg/cli/tests/e2e.sh` to green.
+- [ ] After the harness fix, rerun the post-green outside-`extended/` diff
+      minimization pass again.
 
 ## Product Docs
 
@@ -308,7 +393,7 @@ Update this as implementation teaches us things.
       `extended/docs-site/05-kargo-external/10-step-plugins.md`,
       `extended/docs-site/05-kargo-external/20-step-plugin-build.md`, and
       `extended/docs-site/05-kargo-external/30-step-plugin-rpc.md`.
-- [ ] Prove shared-workdir behavior across a plugin step and a later builtin
+- [x] Prove shared-workdir behavior across a plugin step and a later builtin
       step in one `Promotion`, not just that the plugin RPC returned success.
 - [x] Prove bad auth returns `403` with a real token-checking plugin sidecar or
       a focused transport test that exercises the same contract.

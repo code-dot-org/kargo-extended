@@ -31,6 +31,7 @@ func TestEnginePreparePromotionContextLeavesBuiltinOnlyBehaviorAloneWhenDisabled
 		nil,
 		nil,
 		nil,
+		nil,
 		"system",
 		false,
 	)
@@ -99,11 +100,13 @@ func TestEnginePreparePromotionContextUsesAgentPathForPluginSteps(t *testing.T) 
 		nil,
 		nil,
 		nil,
+		nil,
 		"system",
 		true,
 	)
 	engine.agentRuntime = agentpod.NewRuntimeWithContext(
 		kargoClient,
+		nil,
 		func() (string, error) { return "controller-0", nil },
 		namespaceFile,
 	)

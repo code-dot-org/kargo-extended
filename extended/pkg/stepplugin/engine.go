@@ -24,6 +24,7 @@ type Engine struct {
 
 func NewEngine(
 	kargoClient client.Client,
+	podReader client.Reader,
 	argoCDClient client.Client,
 	credsDB credentials.Database,
 	cacheFunc promotion.ExprDataCacheFn,
@@ -36,7 +37,7 @@ func NewEngine(
 		systemResourcesNamespace,
 		enabled,
 	)
-	agentRuntime := agentpod.NewRuntime(kargoClient)
+	agentRuntime := agentpod.NewRuntime(kargoClient, podReader)
 	return &Engine{
 		builtinEngine: promotion.NewLocalEngine(
 			kargoClient,

@@ -339,7 +339,27 @@ This is the starting list, not permission to stop thinking.
 - Do not implement real OpenTofu or `send-message` plugin runtimes in this repo
   in this first host slice.
 
-### Phase 7: Post-Green External Diff Minimization
+### Phase 7: Repo Smoke-Test Harness
+
+- Reuse the repo's existing CLI e2e harness:
+  - `pkg/cli/tests/e2e.sh`
+- Do not fork or duplicate that script for StepPlugins.
+- Add fork-owned smoke coverage under:
+  - `extended/tests/e2e_stepplugins.sh`
+- Keep the outside-`extended/` hook thin:
+  - one unconditional source or call from `pkg/cli/tests/e2e.sh`
+- Reuse the existing e2e shell helpers, login flow, and cluster assumptions
+  instead of rebuilding them in a second script.
+- Keep the first smoke target small:
+  - one real `mkdir` StepPlugin proof is enough for this slice
+- In that smoke flow, prove:
+  - `kargo step-plugin build` works on the documented example
+  - the generated `ConfigMap` installs and is discovered
+  - a `Stage` can run `uses: mkdir`
+  - a later builtin step sees the directory the plugin created in shared
+    `/workspace`
+
+### Phase 8: Post-Green External Diff Minimization
 
 1. Get the feature green first.
    Start from a working tree where the relevant tests already pass. Do not do
@@ -468,6 +488,10 @@ End-to-end proof:
 
 - the documented `mkdir` example builds, installs, is discovered, and runs
   from a `Stage`
+- the repo e2e harness sources `extended/tests/e2e_stepplugins.sh` instead of
+  duplicating `pkg/cli/tests/e2e.sh`
+- a later builtin step proves the plugin-created directory exists in shared
+  `/workspace`
 
 Docs proof:
 

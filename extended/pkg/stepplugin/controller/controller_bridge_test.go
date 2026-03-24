@@ -27,6 +27,7 @@ func TestNewPromotionEngineReturnsStepPluginEngine(t *testing.T) {
 		fake.NewClientBuilder().WithScheme(scheme).Build(),
 		nil,
 		nil,
+		nil,
 		promotion.DefaultExprDataCacheFn,
 	)
 

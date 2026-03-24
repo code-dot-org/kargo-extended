@@ -431,6 +431,7 @@ func (o *controllerOptions) setupReconcilers(
 			argocdMgr,
 			stepplugincontroller.NewPromotionEngine(
 				kargoMgr.GetClient(),
+				kargoMgr.GetAPIReader(),
 				argoCDClient,
 				credentialsDB,
 				promotion.DefaultExprDataCacheFn,

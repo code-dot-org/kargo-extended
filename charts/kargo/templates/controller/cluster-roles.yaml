@@ -12,9 +12,27 @@ rules:
   resources:
   - configmaps
   verbs:
+  - create
   - get
   - list
+  - update
   - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - create
+  - delete
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - get
+  - update
 - apiGroups:
   - ""
   resources:

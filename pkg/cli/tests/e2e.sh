@@ -341,6 +341,9 @@ run_test_capture() {
     fi
 }
 
+# Load fork-owned smoke tests.
+. "$REPO_ROOT/extended/tests/e2e_stepplugins.sh"
+
 # Cleanup function
 cleanup() {
     log_section "CLEANUP"
@@ -370,6 +373,8 @@ cleanup() {
 
     # Delete shared repo credentials if created
     $KARGO_BIN delete repo-credentials --shared "test-shared-repo-creds" $KARGO_FLAGS 2>/dev/null || true
+
+    cleanup_stepplugin_e2e
 
     log_info "Cleanup complete"
 }
@@ -575,6 +580,11 @@ fi
 log_info "Waiting for warehouse to produce freight..."
 sleep 5
 
+if [[ -n "${STEPPLUGINS_ONLY:-}" ]]; then
+    run_stepplugin_e2e_tests
+    exit 0
+fi
+
 # =============================================================================
 # 5. FREIGHT TESTS
 # =============================================================================
@@ -778,6 +788,10 @@ if [[ -n "$FREIGHT_NAME" ]]; then
     fi
 else
     log_info "No freight available - skipping promotion tests"
+fi
+
+if [[ -z "${STEPPLUGINS_SKIP:-}" ]]; then
+    run_stepplugin_e2e_tests
 fi
 
 # =============================================================================
