@@ -34,6 +34,18 @@ to be added to Kargo.
 - When changing a proposal's status, update both `proposal.md` and
   `status.yaml` if `status.yaml` exists.
 - Sometimes we'll create two completing proposals and reject one after some iteration.
+- @Codex: linking to proposals in chat (good when you refer to them!), make the text
+  of the link [$proposal_dirname]($path_to_proposal_md), NOT [proposal.md]($path_to_proposal.md).
+  I have to haver to see the path overwise and I can't tell which proposal it is.
+  Example DO: [0000-proposal-directory-structure](extended/docs/proposals/00000-proposal-directory-structure/proposal.md)
+- Keep in mind "what's the current proposal?" and "what are we working on?". We might make
+  detours, and it can be very helpful to help me remember what we're up to if
+  I ask.
+- If we seem to be heading in a new direction, after some exploring, it can be
+  very helpful to ask me questions like "Want to start a new proposal for this?"
+- Remember, multiple proposals might be worked on in different chats/agents at once
+  so keep track in your context any proposal (or proposals!) we are working on. Its
+  Important to preserve these memories when compacting context!!!!
 
 ## Implementing new Features and the Proposal Process
 
