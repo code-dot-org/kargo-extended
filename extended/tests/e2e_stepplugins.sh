@@ -362,6 +362,8 @@ EOF
 
 run_send_message_stepplugin_e2e_tests() {
     local smoke_freight_name="$1"
+    local send_message_impl="${STEPPLUGIN_SEND_MESSAGE_IMPL:-go}"
+    local smoke_cmd=()
 
     if [[ "${STEPPLUGIN_SEND_MESSAGE_SMOKE:-false}" != "true" ]]; then
         log_info "Skipping send-message StepPlugin smoke path; set STEPPLUGIN_SEND_MESSAGE_SMOKE=true to enable it"
@@ -378,6 +380,37 @@ run_send_message_stepplugin_e2e_tests() {
         stepplugin_e2e_fail
     fi
 
+    case "$send_message_impl" in
+        go)
+            smoke_cmd=(
+                "$REPO_ROOT/extended/plugins/send-message-go/smoke/smoke-test.sh"
+            )
+            ;;
+        python)
+            smoke_cmd=(
+                python3
+                "$REPO_ROOT/extended/plugins/send-message-python/smoke/smoke_test.py"
+            )
+            ;;
+        ruby)
+            smoke_cmd=(
+                ruby
+                "$REPO_ROOT/extended/plugins/send-message-ruby/smoke/smoke_test.rb"
+            )
+            ;;
+        ts)
+            smoke_cmd=(
+                bash
+                -lc
+                "cd \"$REPO_ROOT/extended/plugins/send-message-ts\" && npm ci && npm run smoke"
+            )
+            ;;
+        *)
+            log_error "Unsupported STEPPLUGIN_SEND_MESSAGE_IMPL=$send_message_impl; expected one of: go, python, ruby, ts"
+            stepplugin_e2e_fail
+            ;;
+    esac
+
     log_test "Run send-message StepPlugin smoke script"
     if ! SEND_MESSAGE_SMOKE_PROJECT="$TEST_PROJECT" \
         SEND_MESSAGE_SMOKE_WAREHOUSE="$TEST_WAREHOUSE" \
@@ -387,7 +420,7 @@ run_send_message_stepplugin_e2e_tests() {
         SEND_MESSAGE_SMOKE_SYSTEM_RESOURCES_NAMESPACE="$SYSTEM_RESOURCES_NS" \
         KARGO_BIN="$KARGO_BIN" \
         KARGO_FLAGS="$KARGO_FLAGS" \
-        "$REPO_ROOT/extended/plugins/send-message/smoke/smoke-test.sh"; then
+        "${smoke_cmd[@]}"; then
         stepplugin_e2e_fail
     fi
 }

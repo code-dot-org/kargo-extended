@@ -176,8 +176,8 @@ log_info "Create send-message MessageChannel"
 "$KUBECTL_BIN" apply -f "/tmp/${CHANNEL_NAME}.yaml"
 log_pass "Create send-message MessageChannel"
 
-STAGE_NAME="smsg-stepplugin-$(date +%s)"
-message_text="send-message stepplugin smoke ${STAGE_NAME}"
+STAGE_NAME="smsg-go-$(date +%s)"
+message_text="send-message GO implementation smoke ${STAGE_NAME}"
 cat > "/tmp/${STAGE_NAME}.yaml" <<EOF
 apiVersion: kargo.akuity.io/v1alpha1
 kind: Stage
