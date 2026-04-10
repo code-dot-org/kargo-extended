@@ -1,0 +1,22 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: send-message-step-plugin-reader
+rules:
+- apiGroups:
+  - ee.kargo.akuity.io
+  resources:
+  - messagechannels
+  - clustermessagechannels
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
