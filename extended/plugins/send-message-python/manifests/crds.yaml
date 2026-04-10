@@ -1,0 +1,81 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: messagechannels.ee.kargo.akuity.io
+spec:
+  group: ee.kargo.akuity.io
+  names:
+    kind: MessageChannel
+    plural: messagechannels
+    singular: messagechannel
+    listKind: MessageChannelList
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              secretRef:
+                type: object
+                properties:
+                  name:
+                    type: string
+                required:
+                - name
+              slack:
+                type: object
+                properties:
+                  channelID:
+                    type: string
+                required:
+                - channelID
+            required:
+            - secretRef
+            - slack
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: clustermessagechannels.ee.kargo.akuity.io
+spec:
+  group: ee.kargo.akuity.io
+  names:
+    kind: ClusterMessageChannel
+    plural: clustermessagechannels
+    singular: clustermessagechannel
+    listKind: ClusterMessageChannelList
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              secretRef:
+                type: object
+                properties:
+                  name:
+                    type: string
+                required:
+                - name
+              slack:
+                type: object
+                properties:
+                  channelID:
+                    type: string
+                required:
+                - channelID
+            required:
+            - secretRef
+            - slack
