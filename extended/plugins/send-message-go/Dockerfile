@@ -8,12 +8,12 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -trimpath -ldflags='-s -w' \
-    -o /out/send-message-step-plugin ./cmd/send-message-step-plugin
+    -o /out/send-message-plugin ./cmd/send-message-plugin
 
 FROM alpine:3.22
 
 RUN apk add --no-cache ca-certificates
 
-COPY --from=build /out/send-message-step-plugin /usr/local/bin/send-message-step-plugin
+COPY --from=build /out/send-message-plugin /usr/local/bin/send-message-plugin
 
-ENTRYPOINT ["/usr/local/bin/send-message-step-plugin"]
+ENTRYPOINT ["/usr/local/bin/send-message-plugin"]

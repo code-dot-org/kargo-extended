@@ -130,6 +130,14 @@ type SlackPostMessageResponse struct {
 	TS    string `json:"ts,omitempty"`
 }
 
+type requestError struct {
+	message string
+}
+
+func (e requestError) Error() string {
+	return e.message
+}
+
 func NewServer(opts Options) *Server {
 	logger := opts.Logger
 	if logger == nil {
@@ -230,6 +238,9 @@ func (s *Server) execute(
 
 	channel, secretNS, err := s.lookupChannel(ctx, req)
 	if err != nil {
+		if isRequestError(err) {
+			return erroredResponse(err)
+		}
 		return failedResponse(err)
 	}
 
@@ -244,6 +255,9 @@ func (s *Server) execute(
 
 	payload, outputThreadTS, err := buildSlackPayload(req.Step.Config, channel)
 	if err != nil {
+		if isRequestError(err) {
+			return erroredResponse(err)
+		}
 		return failedResponse(err)
 	}
 
@@ -281,7 +295,9 @@ func (s *Server) lookupChannel(
 	switch ref.Kind {
 	case "MessageChannel":
 		if req.Context.Project == "" {
-			return nil, "", errors.New("step context project is required for MessageChannel")
+			return nil, "", requestError{
+				message: "step context project is required for MessageChannel",
+			}
 		}
 		channel, err := s.kubeClient.GetMessageChannel(ctx, req.Context.Project, ref.Name)
 		if err != nil {
@@ -295,7 +311,9 @@ func (s *Server) lookupChannel(
 		}
 		return channel, s.systemResourcesNamespace, nil
 	default:
-		return nil, "", fmt.Errorf("unsupported channel kind %q", ref.Kind)
+		return nil, "", requestError{
+			message: fmt.Sprintf("unsupported channel kind %q", ref.Kind),
+		}
 	}
 }
 
@@ -311,11 +329,13 @@ func buildSlackPayload(
 			channelID = strings.TrimSpace(channel.SlackChannelID)
 		}
 		if channelID == "" {
-			return nil, "", fmt.Errorf(
-				"%s %q does not define spec.slack.channelID and config.slack.channelID is empty",
-				channel.ResourceKind,
-				channel.ResourceName,
-			)
+			return nil, "", requestError{
+				message: fmt.Sprintf(
+					"%s %q does not define spec.slack.channelID and config.slack.channelID is empty",
+					channel.ResourceKind,
+					channel.ResourceName,
+				),
+			}
 		}
 		payload = map[string]any{
 			"channel": channelID,
@@ -328,11 +348,15 @@ func buildSlackPayload(
 		return payload, threadTS, nil
 	case "json":
 		if err := json.Unmarshal([]byte(cfg.Message), &payload); err != nil {
-			return nil, "", fmt.Errorf("error decoding JSON Slack payload: %w", err)
+			return nil, "", requestError{
+				message: fmt.Sprintf("error decoding JSON Slack payload: %v", err),
+			}
 		}
 	case "yaml":
 		if err := yaml.Unmarshal([]byte(cfg.Message), &payload); err != nil {
-			return nil, "", fmt.Errorf("error decoding YAML Slack payload: %w", err)
+			return nil, "", requestError{
+				message: fmt.Sprintf("error decoding YAML Slack payload: %v", err),
+			}
 		}
 	case "xml":
 		var err error
@@ -341,20 +365,24 @@ func buildSlackPayload(
 			return nil, "", err
 		}
 	default:
-		return nil, "", fmt.Errorf("unsupported encodingType %q", cfg.EncodingType)
+		return nil, "", requestError{
+			message: fmt.Sprintf("unsupported encodingType %q", cfg.EncodingType),
+		}
 	}
 
 	if payload == nil {
-		return nil, "", errors.New("Slack payload must decode to an object")
+		return nil, "", requestError{message: "Slack payload must decode to an object"}
 	}
 
 	channelID := strings.TrimSpace(channel.SlackChannelID)
 	if channelID == "" {
-		return nil, "", fmt.Errorf(
-			"%s %q does not define spec.slack.channelID",
-			channel.ResourceKind,
-			channel.ResourceName,
-		)
+		return nil, "", requestError{
+			message: fmt.Sprintf(
+				"%s %q does not define spec.slack.channelID",
+				channel.ResourceKind,
+				channel.ResourceName,
+			),
+		}
 	}
 	if _, ok := payload["channel"]; !ok {
 		payload["channel"] = channelID
@@ -373,12 +401,14 @@ type xmlPayloadNode struct {
 func decodeXMLSlackPayload(message string) (map[string]any, error) {
 	var root xmlPayloadNode
 	if err := xml.Unmarshal([]byte(message), &root); err != nil {
-		return nil, fmt.Errorf("error decoding XML Slack payload: %w", err)
+		return nil, requestError{
+			message: fmt.Sprintf("error decoding XML Slack payload: %v", err),
+		}
 	}
 
 	payload := xmlNodeToObject(root)
 	if payload == nil {
-		return nil, errors.New("Slack payload must decode to an object")
+		return nil, requestError{message: "Slack payload must decode to an object"}
 	}
 	return payload, nil
 }
@@ -439,6 +469,20 @@ func failedResponse(err error) StepExecuteResponse {
 		Error:    err.Error(),
 		Terminal: true,
 	}
+}
+
+func erroredResponse(err error) StepExecuteResponse {
+	return StepExecuteResponse{
+		Status:   "Errored",
+		Message:  err.Error(),
+		Error:    err.Error(),
+		Terminal: true,
+	}
+}
+
+func isRequestError(err error) bool {
+	var target requestError
+	return errors.As(err, &target)
 }
 
 func (s *Server) authorize(authHeaderValue string) error {

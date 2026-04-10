@@ -1,7 +1,7 @@
 # Local Smoke Notes
 
 - Primary smoke entrypoint:
-  - `extended/plugins/send-message/smoke/smoke-test.sh`
+  - `extended/plugins/send-message-go/smoke/smoke-test.sh`
 - The script assumes a working Kargo cluster and CLI are already available.
 - Required env:
   - `SEND_MESSAGE_SMOKE_PROJECT`

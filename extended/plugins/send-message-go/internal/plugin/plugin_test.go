@@ -33,6 +33,44 @@ func TestHandlerRejectsMissingBearerToken(t *testing.T) {
 	require.Equal(t, "Errored", resp.Status)
 }
 
+func TestHandlerRejectsInvalidBearerToken(t *testing.T) {
+	srv := newTestServer(t, nil, nil)
+	req := httptest.NewRequest(
+		http.MethodPost,
+		stepExecutePath,
+		bytes.NewReader(mustJSON(t, minimalRequest())),
+	)
+	req.Header.Set(authHeader, bearerPrefix+"wrong-token")
+	rec := httptest.NewRecorder()
+
+	srv.Handler().ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusForbidden, rec.Code)
+	var resp StepExecuteResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	require.Equal(t, "Errored", resp.Status)
+	require.Equal(t, "invalid bearer token", resp.Error)
+}
+
+func TestHandlerRejectsInvalidRequestBody(t *testing.T) {
+	srv := newTestServer(t, nil, nil)
+	req := httptest.NewRequest(
+		http.MethodPost,
+		stepExecutePath,
+		bytes.NewBufferString("{not-json"),
+	)
+	req.Header.Set(authHeader, bearerPrefix+"expected-token")
+	rec := httptest.NewRecorder()
+
+	srv.Handler().ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusBadRequest, rec.Code)
+	var resp StepExecuteResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	require.Equal(t, "Errored", resp.Status)
+	require.Equal(t, "invalid request body", resp.Message)
+}
+
 func TestExecuteUsesNamespacedMessageChannel(t *testing.T) {
 	kube := &fakeKubernetesClient{
 		messageChannels: map[string]*ChannelResource{
@@ -206,6 +244,49 @@ func TestExecuteSupportsJSONEncoding(t *testing.T) {
 	)
 }
 
+func TestExecuteSupportsYAMLEncoding(t *testing.T) {
+	kube := &fakeKubernetesClient{
+		messageChannels: map[string]*ChannelResource{
+			"demo/send": {
+				SecretName:     "slack-token",
+				SlackChannelID: "C123",
+				ResourceKind:   "MessageChannel",
+				ResourceName:   "send",
+				ResourceNS:     "demo",
+			},
+		},
+		secrets: map[string]map[string]string{
+			"demo/slack-token": {"apiKey": "xoxb-demo"},
+		},
+	}
+	slack := &fakeSlackClient{
+		response: &SlackPostMessageResponse{
+			OK: true,
+			TS: "1712345678.000410",
+		},
+	}
+	srv := newTestServer(t, kube, slack)
+
+	req := minimalRequest()
+	req.Context.Project = "demo"
+	req.Step.Config.EncodingType = "yaml"
+	req.Step.Config.Message = "text: rich\nblocks:\n- type: section\n"
+	resp := executeRequest(t, srv, req)
+
+	require.Equal(t, "Succeeded", resp.Status)
+	require.Equal(
+		t,
+		map[string]any{
+			"channel": "C123",
+			"text":    "rich",
+			"blocks": []any{
+				map[string]any{"type": "section"},
+			},
+		},
+		slack.lastPayload,
+	)
+}
+
 func TestExecuteEncodedPayloadIgnoresSlackConfigOverrides(t *testing.T) {
 	kube := &fakeKubernetesClient{
 		messageChannels: map[string]*ChannelResource{
@@ -356,6 +437,33 @@ func TestExecuteSupportsXMLEncoding(t *testing.T) {
 		"1700000000.000003",
 		resp.Output["slack"].(map[string]any)["threadTS"],
 	)
+}
+
+func TestExecuteReturnsErroredForBadYAML(t *testing.T) {
+	kube := &fakeKubernetesClient{
+		messageChannels: map[string]*ChannelResource{
+			"demo/send": {
+				SecretName:     "slack-token",
+				SlackChannelID: "C123",
+				ResourceKind:   "MessageChannel",
+				ResourceName:   "send",
+				ResourceNS:     "demo",
+			},
+		},
+		secrets: map[string]map[string]string{
+			"demo/slack-token": {"apiKey": "xoxb-demo"},
+		},
+	}
+	srv := newTestServer(t, kube, &fakeSlackClient{})
+
+	req := minimalRequest()
+	req.Context.Project = "demo"
+	req.Step.Config.EncodingType = "yaml"
+	req.Step.Config.Message = "text: [oops"
+	resp := executeRequest(t, srv, req)
+
+	require.Equal(t, "Errored", resp.Status)
+	require.Contains(t, resp.Error, "error decoding YAML Slack payload")
 }
 
 type fakeKubernetesClient struct {
