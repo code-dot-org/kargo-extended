@@ -4,6 +4,37 @@ STEPPLUGIN_TEST_STAGE=""
 STEPPLUGIN_CONFIGMAP_NAME="mkdir-step-plugin"
 STEPPLUGIN_PLUGIN_DIR=""
 
+create_stepplugin_smoke_promotion() {
+    local project="$1"
+    local freight_name="$2"
+    local stage_name="$3"
+    local promotion_name="stepplugin-smoke-promotion-$(date +%s)"
+    local promotion_path="/tmp/${promotion_name}.yaml"
+
+    cat > "$promotion_path" <<EOF
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Promotion
+metadata:
+  name: ${promotion_name}
+  namespace: ${project}
+spec:
+  stage: ${stage_name}
+  freight: ${freight_name}
+  steps:
+  - uses: mkdir
+    config:
+      path: demo/subdir
+  - uses: copy
+    config:
+      inPath: demo/subdir
+      outPath: copied/subdir
+EOF
+
+    run_test \
+        "Create StepPlugin smoke promotion" \
+        "kubectl apply -f $promotion_path"
+}
+
 stepplugin_e2e_end() {
     local status="$1"
 
@@ -327,9 +358,10 @@ EOF
         stepplugin_e2e_fail
     fi
 
-    run_test \
-        "Promote freight through StepPlugin smoke stage" \
-        "$KARGO_BIN promote --project=$TEST_PROJECT --freight=$smoke_freight_name --stage=$STEPPLUGIN_TEST_STAGE $KARGO_FLAGS"
+    create_stepplugin_smoke_promotion \
+        "$TEST_PROJECT" \
+        "$smoke_freight_name" \
+        "$STEPPLUGIN_TEST_STAGE"
 
     local promotion_name
     for _ in $(seq 1 20); do
