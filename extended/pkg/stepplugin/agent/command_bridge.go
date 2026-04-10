@@ -26,6 +26,12 @@ import (
 	"github.com/akuity/kargo/pkg/types"
 )
 
+var authDir = common.AuthDir
+
+const authDirMode = 0o755
+
+const authFileMode = 0o444
+
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "promotion-agent",
@@ -54,11 +60,11 @@ func runAgentInit(context.Context) error {
 		containerNames[target.ContainerName] = struct{}{}
 	}
 	for containerName := range containerNames {
-		filename := filepath.Join(common.AuthDir, containerName, common.AuthFilename)
-		if err := os.MkdirAll(filepath.Dir(filename), 0o770); err != nil {
+		filename := filepath.Join(authDir, containerName, common.AuthFilename)
+		if err := os.MkdirAll(filepath.Dir(filename), authDirMode); err != nil {
 			return err
 		}
-		if err := os.WriteFile(filename, []byte(rand.String(32)), 0o400); err != nil {
+		if err := os.WriteFile(filename, []byte(rand.String(32)), authFileMode); err != nil {
 			return err
 		}
 	}

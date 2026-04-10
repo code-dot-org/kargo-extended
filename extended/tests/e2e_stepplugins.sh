@@ -356,5 +356,38 @@ EOF
     fi
 
     wait_for_stepplugin_promotion "$promotion_name"
+    run_send_message_stepplugin_e2e_tests "$smoke_freight_name"
     stepplugin_e2e_end "success"
+}
+
+run_send_message_stepplugin_e2e_tests() {
+    local smoke_freight_name="$1"
+
+    if [[ "${STEPPLUGIN_SEND_MESSAGE_SMOKE:-false}" != "true" ]]; then
+        log_info "Skipping send-message StepPlugin smoke path; set STEPPLUGIN_SEND_MESSAGE_SMOKE=true to enable it"
+        return 0
+    fi
+
+    if [[ -z "${STEPPLUGIN_SEND_MESSAGE_SLACK_API_KEY:-}" ]]; then
+        log_error "STEPPLUGIN_SEND_MESSAGE_SLACK_API_KEY is required for send-message StepPlugin smoke"
+        stepplugin_e2e_fail
+    fi
+
+    if [[ -z "${STEPPLUGIN_SEND_MESSAGE_CHANNEL_ID:-}" ]]; then
+        log_error "STEPPLUGIN_SEND_MESSAGE_CHANNEL_ID is required for send-message StepPlugin smoke"
+        stepplugin_e2e_fail
+    fi
+
+    log_test "Run send-message StepPlugin smoke script"
+    if ! SEND_MESSAGE_SMOKE_PROJECT="$TEST_PROJECT" \
+        SEND_MESSAGE_SMOKE_WAREHOUSE="$TEST_WAREHOUSE" \
+        SEND_MESSAGE_SMOKE_FREIGHT_NAME="$smoke_freight_name" \
+        SEND_MESSAGE_SMOKE_SLACK_API_KEY="$STEPPLUGIN_SEND_MESSAGE_SLACK_API_KEY" \
+        SEND_MESSAGE_SMOKE_CHANNEL_ID="$STEPPLUGIN_SEND_MESSAGE_CHANNEL_ID" \
+        SEND_MESSAGE_SMOKE_SYSTEM_RESOURCES_NAMESPACE="$SYSTEM_RESOURCES_NS" \
+        KARGO_BIN="$KARGO_BIN" \
+        KARGO_FLAGS="$KARGO_FLAGS" \
+        "$REPO_ROOT/extended/plugins/send-message/smoke/smoke-test.sh"; then
+        stepplugin_e2e_fail
+    fi
 }
