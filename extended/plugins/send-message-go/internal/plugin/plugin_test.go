@@ -103,7 +103,7 @@ func TestExecuteUsesNamespacedMessageChannel(t *testing.T) {
 	resp := executeRequest(t, srv, req)
 
 	require.Equal(t, "Succeeded", resp.Status)
-	require.Equal(t, "1712345678.000100", resp.Output["slack"].(map[string]any)["threadTS"])
+	require.Equal(t, "1712345678.000100", slackThreadTS(t, resp))
 	require.Equal(
 		t,
 		map[string]any{
@@ -197,7 +197,7 @@ func TestExecuteHonorsSlackOverrides(t *testing.T) {
 	require.Equal(
 		t,
 		"1700000000.000001",
-		resp.Output["slack"].(map[string]any)["threadTS"],
+		slackThreadTS(t, resp),
 	)
 }
 
@@ -331,7 +331,7 @@ func TestExecuteEncodedPayloadIgnoresSlackConfigOverrides(t *testing.T) {
 	require.Equal(
 		t,
 		"1700000000.000002",
-		resp.Output["slack"].(map[string]any)["threadTS"],
+		slackThreadTS(t, resp),
 	)
 }
 
@@ -435,7 +435,7 @@ func TestExecuteSupportsXMLEncoding(t *testing.T) {
 	require.Equal(
 		t,
 		"1700000000.000003",
-		resp.Output["slack"].(map[string]any)["threadTS"],
+		slackThreadTS(t, resp),
 	)
 }
 
@@ -573,6 +573,17 @@ func executeRequest(
 	var resp StepExecuteResponse
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 	return resp
+}
+
+func slackThreadTS(t *testing.T, resp StepExecuteResponse) string {
+	t.Helper()
+
+	require.Contains(t, resp.Output, "slack")
+	slackOutput, ok := resp.Output["slack"].(map[string]any)
+	require.True(t, ok)
+	threadTS, ok := slackOutput["threadTS"].(string)
+	require.True(t, ok)
+	return threadTS
 }
 
 func minimalRequest() StepExecuteRequest {

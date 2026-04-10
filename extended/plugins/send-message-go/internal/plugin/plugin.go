@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -24,13 +25,15 @@ const (
 	authHeader      = "Authorization"
 	bearerPrefix    = "Bearer "
 
-	authTokenPath        = "/var/run/kargo/token"
-	serviceAccountDir    = "/var/run/secrets/kubernetes.io/serviceaccount"
-	serviceAccountToken  = "token"
-	serviceAccountCA     = "ca.crt"
-	defaultSystemNS      = "kargo-system-resources"
-	defaultSlackAPIBase  = "https://slack.com/api"
-	defaultKubernetesURL = "https://kubernetes.default.svc"
+	//nolint:gosec // Fixed in-cluster mount path, not a hardcoded credential.
+	defaultExpectedAuthPath = "/var/run/kargo/token"
+	serviceAccountDir       = "/var/run/secrets/kubernetes.io/serviceaccount"
+	serviceAccountToken     = "token"
+	serviceAccountCA        = "ca.crt"
+	defaultSystemNS         = "kargo-system-resources"
+	defaultSlackAPIBase     = "https://slack.com/api"
+	defaultKubernetesURL    = "https://kubernetes.default.svc"
+	defaultHTTPTimeout      = 30 * time.Second
 )
 
 type Options struct {
@@ -146,7 +149,7 @@ func NewServer(opts Options) *Server {
 
 	expectedTokenPath := opts.ExpectedTokenPath
 	if expectedTokenPath == "" {
-		expectedTokenPath = authTokenPath
+		expectedTokenPath = defaultExpectedAuthPath
 	}
 
 	systemNS := opts.SystemResourcesNamespace
@@ -250,7 +253,7 @@ func (s *Server) execute(
 	}
 	token := secret["apiKey"]
 	if token == "" {
-		return failedResponse(errors.New("Slack Secret is missing key \"apiKey\""))
+		return failedResponse(errors.New("slack Secret is missing key \"apiKey\""))
 	}
 
 	payload, outputThreadTS, err := buildSlackPayload(req.Step.Config, channel)
@@ -271,7 +274,7 @@ func (s *Server) execute(
 		return failedResponse(fmt.Errorf("error posting Slack message: %w", err))
 	}
 	if !slackResp.OK {
-		return failedResponse(fmt.Errorf("Slack API error: %s", slackResp.Error))
+		return failedResponse(fmt.Errorf("slack API error: %s", slackResp.Error))
 	}
 	if outputThreadTS == "" {
 		outputThreadTS = slackResp.TS
@@ -486,6 +489,7 @@ func isRequestError(err error) bool {
 }
 
 func (s *Server) authorize(authHeaderValue string) error {
+	//nolint:gosec // Path is plugin configuration or the fixed auth mount path.
 	expected, err := os.ReadFile(s.expectedTokenPath)
 	if err != nil {
 		return fmt.Errorf("error reading auth token: %w", err)
@@ -533,7 +537,9 @@ func (RealSlackClient) PostMessage(
 	req.Header.Set("Authorization", bearerPrefix+token)
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := http.DefaultClient.Do(req)
+	client := &http.Client{Timeout: defaultHTTPTimeout}
+	//nolint:gosec // The request target is the configured Slack API base URL.
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -596,6 +602,7 @@ func NewInClusterKubernetesClient() (KubernetesClient, error) {
 	return &inClusterKubernetesClient{
 		baseURL: baseURL,
 		client: &http.Client{
+			Timeout: defaultHTTPTimeout,
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{
 					MinVersion: tls.VersionTLS12,
@@ -727,6 +734,7 @@ func (c *inClusterKubernetesClient) getJSON(
 	}
 	req.Header.Set(authHeader, bearerPrefix+c.token)
 
+	//nolint:gosec // The request target is the in-cluster Kubernetes API.
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return err
@@ -738,7 +746,7 @@ func (c *inClusterKubernetesClient) getJSON(
 	}
 	if resp.StatusCode >= http.StatusBadRequest {
 		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("Kubernetes API error %s: %s", resp.Status, strings.TrimSpace(string(body)))
+		return fmt.Errorf("kubernetes API error %s: %s", resp.Status, strings.TrimSpace(string(body)))
 	}
 	return json.NewDecoder(resp.Body).Decode(out)
 }
