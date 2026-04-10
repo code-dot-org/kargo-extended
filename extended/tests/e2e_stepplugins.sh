@@ -1,9 +1,39 @@
 #!/usr/bin/env bash
 
 STEPPLUGIN_TEST_STAGE=""
-STEPPLUGIN_TEST_PROMOTION=""
 STEPPLUGIN_CONFIGMAP_NAME="mkdir-step-plugin"
 STEPPLUGIN_PLUGIN_DIR=""
+
+create_stepplugin_smoke_promotion() {
+    local project="$1"
+    local freight_name="$2"
+    local stage_name="$3"
+    local promotion_name="stepplugin-smoke-promotion-$(date +%s)"
+    local promotion_path="/tmp/${promotion_name}.yaml"
+
+    cat > "$promotion_path" <<EOF
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Promotion
+metadata:
+  name: ${promotion_name}
+  namespace: ${project}
+spec:
+  stage: ${stage_name}
+  freight: ${freight_name}
+  steps:
+  - uses: mkdir
+    config:
+      path: demo/subdir
+  - uses: copy
+    config:
+      inPath: demo/subdir
+      outPath: copied/subdir
+EOF
+
+    run_test \
+        "Create StepPlugin smoke promotion" \
+        "kubectl apply -f $promotion_path"
+}
 
 stepplugin_e2e_end() {
     local status="$1"
@@ -19,12 +49,6 @@ stepplugin_e2e_fail() {
 cleanup_stepplugin_e2e() {
     if [[ -n "${STEPPLUGIN_TEST_STAGE:-}" && -n "${TEST_PROJECT:-}" ]]; then
         kubectl delete stage.kargo.akuity.io "$STEPPLUGIN_TEST_STAGE" \
-            -n "$TEST_PROJECT" \
-            --ignore-not-found >/dev/null 2>&1 || true
-    fi
-
-    if [[ -n "${STEPPLUGIN_TEST_PROMOTION:-}" && -n "${TEST_PROJECT:-}" ]]; then
-        kubectl delete promotion.kargo.akuity.io "$STEPPLUGIN_TEST_PROMOTION" \
             -n "$TEST_PROJECT" \
             --ignore-not-found >/dev/null 2>&1 || true
     fi
@@ -334,31 +358,36 @@ EOF
         stepplugin_e2e_fail
     fi
 
-    STEPPLUGIN_TEST_PROMOTION="${STEPPLUGIN_TEST_STAGE}.manual"
-    cat > "/tmp/${STEPPLUGIN_TEST_PROMOTION}.yaml" <<EOF
-apiVersion: kargo.akuity.io/v1alpha1
-kind: Promotion
-metadata:
-  name: ${STEPPLUGIN_TEST_PROMOTION}
-  namespace: ${TEST_PROJECT}
-spec:
-  stage: ${STEPPLUGIN_TEST_STAGE}
-  freight: ${smoke_freight_name}
-  steps:
-  - uses: mkdir
-    config:
-      path: demo/subdir
-  - uses: copy
-    config:
-      inPath: demo/subdir
-      outPath: copied/subdir
-EOF
+    create_stepplugin_smoke_promotion \
+        "$TEST_PROJECT" \
+        "$smoke_freight_name" \
+        "$STEPPLUGIN_TEST_STAGE"
 
-    run_test \
-        "Create StepPlugin smoke promotion" \
-        "kubectl apply -f /tmp/${STEPPLUGIN_TEST_PROMOTION}.yaml"
+    local promotion_name
+    for _ in $(seq 1 20); do
+        promotion_name=$(
+            kubectl get promotion.kargo.akuity.io \
+                -n "$TEST_PROJECT" \
+                -o json 2>/dev/null |
+                jq -r --arg stage "$STEPPLUGIN_TEST_STAGE" '
+                    [.items[] | select(.spec.stage == $stage)]
+                    | sort_by(.metadata.creationTimestamp)
+                    | last
+                    | .metadata.name // empty
+                '
+        )
+        if [[ -n "$promotion_name" ]]; then
+            break
+        fi
+        sleep 1
+    done
+    if [[ -z "$promotion_name" ]]; then
+        log_error "Could not parse StepPlugin smoke promotion name"
+        kubectl get promotion.kargo.akuity.io -n "$TEST_PROJECT" -o yaml
+        stepplugin_e2e_fail
+    fi
 
-    wait_for_stepplugin_promotion "$STEPPLUGIN_TEST_PROMOTION"
+    wait_for_stepplugin_promotion "$promotion_name"
     run_send_message_stepplugin_e2e_tests "$smoke_freight_name"
     stepplugin_e2e_end "success"
 }
