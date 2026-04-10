@@ -11,6 +11,7 @@ upstream-kargo-merge/YYYY-MM-DD
 
 Report path:
 
+
 ```text
 extended/docs/upstream-kargo-merge-reports/YYYY-MM-DD.yaml
 ```
