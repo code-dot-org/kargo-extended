@@ -23,6 +23,12 @@ to be added to Kargo.
 - Only change files outside `extended/` as minimally as possible to reduce
   merge conflicts with upstream.
 
+## Upstream Kargo merges
+
+- If asked to merge with upstream Kargo, merge in latest Kargo, merge with
+  latest upstream, or anything materially similar, follow
+  `extended/docs/UPSTREAM_KARGO_MERGE_PROCEDURE.md`
+
 ## Merge Conflict Discipline Avoidance OUTSIDE `extended/`: keep it short by importing code from `extended/`
 
 - PRIMARY GOAL DURING ALL IMPLEMENTATIONS: minimize both total changed lines and the number of
