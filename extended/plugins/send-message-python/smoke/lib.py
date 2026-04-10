@@ -63,10 +63,10 @@ class SmokeResources:
         self.rendered_plugin_dir = tmp_dir / "plugin"
         self.configmap_path: Path | None = None
         self.cluster_role_binding_name = f"send-message-step-plugin-reader-{env.project}"
-        self.stage_name = f"smsg-stepplugin-{int(time.time())}"
+        self.stage_name = f"smsg-python-{int(time.time())}"
         self.promotion_name = f"{self.stage_name}-promotion"
         self.message_text = (
-            f"send-message PYTHON stepplugin smoke {self.stage_name}"
+            f"send-message Python implementation smoke {self.stage_name}"
         )
 
     def write_plugin_dir(self, image_tag: str) -> None:

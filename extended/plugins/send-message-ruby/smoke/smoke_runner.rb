@@ -180,7 +180,7 @@ module SendMessageRubySmoke
     end
 
     def run_stage
-      @stage_name = "smsgrb-#{Time.now.to_i}"
+      @stage_name = "smsg-ruby-#{Time.now.to_i}"
       info("Create send-message StepPlugin smoke stage")
       output = capture(
         @kargo_bin,
@@ -392,7 +392,7 @@ module SendMessageRubySmoke
                       "kind" => "MessageChannel",
                       "name" => @channel_name
                     },
-                    "message" => "send-message StepPlugin smoke from the Ruby implementation #{@stage_name}"
+                    "message" => "send-message Ruby implementation smoke #{@stage_name}"
                   }
                 }
               ]

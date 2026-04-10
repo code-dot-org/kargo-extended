@@ -129,7 +129,7 @@ spec:
           channel:
             kind: MessageChannel
             name: ${channelName}
-          message: TypeScript send-message StepPlugin smoke from ${stageName}
+          message: send-message TypeScript implementation smoke ${stageName}
 `),
   });
   logPass("create smoke Stage");

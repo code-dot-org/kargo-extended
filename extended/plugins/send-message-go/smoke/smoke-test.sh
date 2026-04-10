@@ -177,7 +177,7 @@ log_info "Create send-message MessageChannel"
 log_pass "Create send-message MessageChannel"
 
 STAGE_NAME="smsg-go-$(date +%s)"
-message_text="send-message GO implementation smoke ${STAGE_NAME}"
+message_text="send-message Go implementation smoke ${STAGE_NAME}"
 cat > "/tmp/${STAGE_NAME}.yaml" <<EOF
 apiVersion: kargo.akuity.io/v1alpha1
 kind: Stage
