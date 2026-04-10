@@ -1,0 +1,34 @@
+apiVersion: kargo-extended.code.org/v1alpha1
+kind: StepPlugin
+metadata:
+  name: send-message
+  namespace: kargo-system-resources
+spec:
+  sidecar:
+    automountServiceAccountToken: true
+    container:
+      name: send-message-step-plugin
+      image: send-message-step-plugin:dev
+      imagePullPolicy: IfNotPresent
+      env:
+      - name: SYSTEM_RESOURCES_NAMESPACE
+        value: kargo-system-resources
+      ports:
+      - containerPort: 9765
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+          - ALL
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 250m
+          memory: 128Mi
+  steps:
+  - kind: send-message

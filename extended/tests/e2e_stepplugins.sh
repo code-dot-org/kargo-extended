@@ -4,6 +4,37 @@ STEPPLUGIN_TEST_STAGE=""
 STEPPLUGIN_CONFIGMAP_NAME="mkdir-step-plugin"
 STEPPLUGIN_PLUGIN_DIR=""
 
+create_stepplugin_smoke_promotion() {
+    local project="$1"
+    local freight_name="$2"
+    local stage_name="$3"
+    local promotion_name="stepplugin-smoke-promotion-$(date +%s)"
+    local promotion_path="/tmp/${promotion_name}.yaml"
+
+    cat > "$promotion_path" <<EOF
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Promotion
+metadata:
+  name: ${promotion_name}
+  namespace: ${project}
+spec:
+  stage: ${stage_name}
+  freight: ${freight_name}
+  steps:
+  - uses: mkdir
+    config:
+      path: demo/subdir
+  - uses: copy
+    config:
+      inPath: demo/subdir
+      outPath: copied/subdir
+EOF
+
+    run_test \
+        "Create StepPlugin smoke promotion" \
+        "kubectl apply -f $promotion_path"
+}
+
 stepplugin_e2e_end() {
     local status="$1"
 
@@ -12,36 +43,6 @@ stepplugin_e2e_end() {
 
 stepplugin_e2e_fail() {
     stepplugin_e2e_end "failed"
-    exit 1
-}
-
-run_stepplugin_promote_command() {
-    local freight_name="$1"
-    local stage_name="$2"
-    local output=""
-
-    log_test "Promote freight through StepPlugin smoke stage"
-    log_info "Command: $KARGO_BIN promote --project=$TEST_PROJECT --freight=$freight_name --stage=$stage_name $KARGO_FLAGS"
-
-    if output=$("$KARGO_BIN" promote \
-        "--project=$TEST_PROJECT" \
-        "--freight=$freight_name" \
-        "--stage=$stage_name" \
-        ${KARGO_FLAGS:+$KARGO_FLAGS} 2>&1); then
-        printf '%s\n' "$output"
-        log_success "Promote freight through StepPlugin smoke stage"
-        return 0
-    fi
-
-    printf '%s\n' "$output"
-    if grep -Fq "panic: runtime error: invalid memory address or nil pointer dereference" <<<"$output"; then
-        log_info "kargo promote hit the known printer panic after submit; continuing and verifying via Promotion state"
-        log_success "Promote freight through StepPlugin smoke stage"
-        return 0
-    fi
-
-    log_error "Promote freight through StepPlugin smoke stage"
-    echo -e "${RED}Command failed: $KARGO_BIN promote --project=$TEST_PROJECT --freight=$freight_name --stage=$stage_name $KARGO_FLAGS${NC}"
     exit 1
 }
 
@@ -357,7 +358,10 @@ EOF
         stepplugin_e2e_fail
     fi
 
-    run_stepplugin_promote_command "$smoke_freight_name" "$STEPPLUGIN_TEST_STAGE"
+    create_stepplugin_smoke_promotion \
+        "$TEST_PROJECT" \
+        "$smoke_freight_name" \
+        "$STEPPLUGIN_TEST_STAGE"
 
     local promotion_name
     for _ in $(seq 1 20); do

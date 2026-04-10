@@ -20,8 +20,6 @@ Date: 2026-03-24
   `extended/plugins/send-message`.
 - Use that subtree to test whether a third party can implement the plugin
   without merge permissions in the main repo.
-- Match the public Kargo `send-message` step shape for the Slack subset as
-  closely as public docs allow.
 - Keep channel lookup and referenced Secret reads in the plugin, not the host.
 - Do not implement SMTP in this slice.
 
