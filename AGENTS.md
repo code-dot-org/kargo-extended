@@ -58,6 +58,7 @@ to be added to Kargo.
   `extended/` whenever Go package boundaries allow it.
 - Load code from `extended/` helper libraries instead of defining new logic in
   files outside `extended/`.
+- Do not fix unrelated upstream bugs outside `extended/` just because you trip over them; only touch upstream-owned files when the fork feature actually needs it.
 - Expect each edited file outside `extended/` to have a corresponding helper or
   adapter in `extended/` when that reduces merge-conflict risk.
 - For every feature seam that forces an edit outside `extended/`, add tests
@@ -141,6 +142,7 @@ to be added to Kargo.
    proposal.
 2. Update the proposal as we discuss tradeoffs conversationally and I make
    decisions.
+2.5. When implementation is requested for a proposal with a non-trivial contract, write `spec.md` from `proposal.md` before `implementation_plan.md`.
 3. When I tell you to implement, write `implementation_plan.md` first. Follow
    proposal `0000` guidelines in
    `extended/docs/proposals/0000-proposal-directory-structure/proposal.md`.

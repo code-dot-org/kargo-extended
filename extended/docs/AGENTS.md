@@ -25,7 +25,7 @@ Decisions:
 - Current direction for `kargo-extended` is runtime-loaded StepPlugins modeled on Argo Workflows executor plugins, not compile-time plugin imports. - 2026-03-23
 - Plugins are discovered at runtime from the cluster, not imported into the controller binary. - 2026-03-23
 - `kargo-extension-opentofu` implements `tf-plan`, `tf-output`, and `tf-apply`. - 2026-03-23
-- `kargo-extension-send-message` uses the same interface as the pro feature as closely as public docs allow. - 2026-03-23
+- `kargo-extension-send-message` does not keep the "as closely as public docs allow" hedge. - 2026-04-10
 - `kargo-extension-send-message` implements `MessageChannel` and `ClusterMessageChannel`. - 2026-03-23
 - `kargo-extension-send-message` includes Slack only. - 2026-03-23
 - `kargo-extension-send-message` does not include SMTP. - 2026-03-23
