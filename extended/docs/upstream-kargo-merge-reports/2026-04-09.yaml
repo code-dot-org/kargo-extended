@@ -1,0 +1,27 @@
+date: 2026-04-09
+merge_branch: upstream-kargo-merge/2026-04-09
+target_branch: main
+target_remote: origin
+source_remote: upstream
+source_branch: main
+fork_base_commit: 5d5b1044f90d6579782ba694620a1a67052e8509
+upstream_commit: a97d75921adc0348a0318de0419e82a8bc83dd3f
+conflicted_files: []
+conflicts: []
+post_merge_adjustments: []
+validation:
+  make_test_unit: pass
+  make_lint: pass
+  make_build_cli_with_ui: pass
+  go_build_cmd_controlplane: pass
+  git_diff_check: pass
+  stepplugins_only_e2e: skipped
+notes:
+  - No textual merge conflicts occurred.
+  - No conflict-resolution PR inline comments are required for this merge.
+  - Local validation required forcing $(go env GOROOT)/bin ahead of the Homebrew
+    go shim because /opt/homebrew/bin/go is still 1.25.4 while this repo now
+    uses go 1.26.0.
+  - Local UI validation required a full pnpm install, not pnpm install --dev,
+    and a manual unpack of @rollup/rollup-darwin-arm64 because optional
+    dependencies were skipped on this machine.
